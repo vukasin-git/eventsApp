@@ -2,12 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/my_events_placeholder"
-        android:textSize="18sp" />
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/btnInterestedEvents"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/interested_events" />
+
+        <Button
+            android:id="@+id/btnAttendingEvents"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:text="@string/attending_events" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnMyProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/my_profile" />
+
 </LinearLayout>

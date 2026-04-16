@@ -12,17 +12,30 @@
         android:theme="@style/Theme.EventsApp"
         tools:targetApi="31">
 
-        <activity android:name=".EventsActivity" />
-
+        <activity
+            android:name=".Password"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AttendingEventsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".InterestedEventsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EventsActivity"
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
