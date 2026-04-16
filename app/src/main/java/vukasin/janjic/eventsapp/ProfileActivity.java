@@ -27,8 +27,8 @@ public class ProfileActivity extends AppCompatActivity {
             String username = bundle.getString("username");
             String email = bundle.getString("email");
 
-            tvProfileUsername.setText(getString(R.string.profile_username, username));
-            tvProfileEmail.setText(getString(R.string.profile_email, email));
+            tvProfileUsername.setText( username);
+            tvProfileEmail.setText(email);
         }
 
         btnPassword.setOnClickListener(v -> {
