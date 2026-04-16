@@ -5,4 +5,17 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
+    <string name="admin_email">admin@eventsapp.com</string>
+    <string name="wrong_login">Pogresan username ili password</string>
+    <string name="fill_all_fields">Popunite sva polja</string>
+    <string name="events">Events</string>
+    <string name="my_events">My Events</string>
+    <string name="friends">Friends</string>
+    <string name="no_events">No upcoming events</string>
+    <string name="my_events_placeholder">My Events screen</string>
+    <string name="welcome_user">Welcome</string>
+    <string name="user">username</string>
+
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

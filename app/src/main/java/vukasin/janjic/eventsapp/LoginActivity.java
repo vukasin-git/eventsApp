@@ -69,12 +69,12 @@ public class LoginActivity extends AppCompatActivity {
 
                     Bundle bundle = new Bundle();
                     bundle.putString("username", username);
-                    bundle.putString("email", "admin@eventsapp.com");
+                    bundle.putString("email", getString(R.string.admin_email));
 
                     intent.putExtras(bundle);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(LoginActivity.this, "Pogresan username ili password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.wrong_login), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                 String email = registerEmail.getText().toString().trim();
 
                 if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
-                    Toast.makeText(LoginActivity.this, "Popunite sva polja", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this,  getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
