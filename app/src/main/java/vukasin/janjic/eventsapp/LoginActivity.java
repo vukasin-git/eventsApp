@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                 String email = registerEmail.getText().toString().trim();
 
                 if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
-                    Toast.makeText(LoginActivity.this,  getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -102,4 +102,21 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+        @Override
+        public void onBackPressed() {
+            if (loginEkran.getVisibility() == View.VISIBLE || registerEkran.getVisibility() == View.VISIBLE) {
+                loginUsername.setText("");
+                loginPassword.setText("");
+
+                registerUsername.setText("");
+                registerPassword.setText("");
+                registerEmail.setText("");
+                loginEkran.setVisibility(View.GONE);
+                registerEkran.setVisibility(View.GONE);
+                pocetniEkran.setVisibility(View.VISIBLE);
+            } else {
+                super.onBackPressed();
+            }
+        }
+
 }
