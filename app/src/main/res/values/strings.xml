@@ -47,4 +47,9 @@
     <string name="attending_button">ATTENDING</string>
     <string name="added_to_interested">Dodat u zainteresovane.</string>
     <string name="signed_up_attending">Prijavili ste se na događaj.</string>
+    <string name="no_interested_events">Nemate zainteresovanih događaja</string>
+    <string name="no_attending_events">Nemate prijavljenih događaja</string>
+    <string name="upcoming_events">Predstojeći događaji</string>
+    <string name="past_events">Prošli događaji</string>
+    <string name="rate">OCENI</string>
 </resources>
