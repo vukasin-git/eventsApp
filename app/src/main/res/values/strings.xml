@@ -52,4 +52,18 @@
     <string name="upcoming_events">Predstojeći događaji</string>
     <string name="past_events">Prošli događaji</string>
     <string name="rate">OCENI</string>
+    <string name="confirm_rating">POTVRDI OCENU</string>
+    <string name="choose_rating_first">Odaberite ocenu pre potvrde.</string>
+    <string name="rating_saved">Ocena je sačuvana.</string>
+    <string name="rate_event_title">Oceni događaj</string>
+    <string name="hint_event_name">Naziv događaja</string>
+    <string name="hint_event_description">Opis</string>
+    <string name="hint_event_location">Lokacija</string>
+    <string name="hint_event_datetime">dd.MM.yyyy HH:mm</string>
+    <string name="promoted_event">Promoted event</string>
+    <string name="hint_capacity">Kapacitet</string>
+    <string name="create_event">KREIRAJ EVENT</string>
+    <string name="fill_required_fields">Popunite sva obavezna polja.</string>
+    <string name="invalid_capacity">Unesite ispravan kapacitet.</string>
+    <string name="event_created_successfully">Događaj uspešno kreiran.</string>
 </resources>

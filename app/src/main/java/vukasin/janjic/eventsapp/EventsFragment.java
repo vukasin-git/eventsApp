@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
+
 public class EventsFragment extends Fragment {
 
     ListView listEvents;
@@ -102,7 +103,23 @@ public class EventsFragment extends Fragment {
                 adapter.setEvents(AppData.getSortedEventsByCategory("Exhibition"));
             }
         });
+        btnAddEvent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CreateEventActivity.class);
+                startActivity(intent);
+            }
+        });
 
         return view;
+    }
+    //on resume za reload nakon unosa novog dogadjaja
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (adapter != null) {
+            adapter.setEvents(AppData.getSortedEvents());
+        }
     }
 }

@@ -31,6 +31,12 @@
             android:name=".EventDetailsActivity"
             android:exported="false" />
         <activity
+            android:name=".RatingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CreateEventActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>

@@ -9,4 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="promoted_event_background">#D4AF37</color>
     <color name ="orange">#F57C00</color>
+    <color name="star_inactive">#9E9E9E</color>
+    <color name="star_active">#FFC107</color>
+
 </resources>

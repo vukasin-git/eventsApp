@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.content.Intent;
 
 import java.util.ArrayList;
 
@@ -84,8 +85,18 @@ public class AttendingEventAdapter extends BaseAdapter {
 
         if (showRateButton) {
             viewHolder.btnRateEvent.setVisibility(View.VISIBLE);
+
+            viewHolder.btnRateEvent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, RatingActivity.class);
+                    intent.putExtra("event_name", event.getName());
+                    mContext.startActivity(intent);
+                }
+            });
         } else {
             viewHolder.btnRateEvent.setVisibility(View.GONE);
+            viewHolder.btnRateEvent.setOnClickListener(null);
         }
 
         return convertView;
