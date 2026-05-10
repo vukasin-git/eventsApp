@@ -37,4 +37,14 @@
     <string name="category_theater">Stand-Up &amp; Theater</string>
     <string name="category_concert">Concert</string>
     <string name="category_exhibition">Exhibition</string>
+
+    <string name="category_label">Kategorija: %1$s</string>
+    <string name="location_label">Lokacija: %1$s</string>
+    <string name="datetime_label">Datum i vreme: %1$s</string>
+    <string name="average_rating">Prosečna ocena: %1$.1f (%2$d ocena)</string>
+    <string name="no_ratings">Još uvek nema ocena</string>
+    <string name="interested_button">INTERESTED</string>
+    <string name="attending_button">ATTENDING</string>
+    <string name="added_to_interested">Dodat u zainteresovane.</string>
+    <string name="signed_up_attending">Prijavili ste se na događaj.</string>
 </resources>

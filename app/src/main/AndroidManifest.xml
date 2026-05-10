@@ -28,6 +28,9 @@
             android:name=".EventsActivity"
             android:exported="false" />
         <activity
+            android:name=".EventDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>

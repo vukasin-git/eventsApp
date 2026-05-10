@@ -1,5 +1,6 @@
 package vukasin.janjic.eventsapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -47,6 +49,17 @@ public class EventsFragment extends Fragment {
         listEvents.setAdapter(adapter);
 
         adapter.setEvents(AppData.getSortedEvents());
+
+        listEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                Event event = (Event) adapter.getItem(position);
+
+                Intent intent = new Intent(getActivity(), EventDetailsActivity.class);
+                intent.putExtra("event_name", event.getName());
+                startActivity(intent);
+            }
+        });
 
         btnCategoryAll.setOnClickListener(new View.OnClickListener() {
             @Override
