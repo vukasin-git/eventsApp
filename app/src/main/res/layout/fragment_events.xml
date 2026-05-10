@@ -2,12 +2,67 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <HorizontalScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/no_events"
-        android:textSize="18sp" />
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/layoutCategoryFilters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCategoryAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_all" />
+
+            <Button
+                android:id="@+id/btnCategoryParty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_party" />
+
+            <Button
+                android:id="@+id/btnCategoryFestival"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_festival" />
+
+            <Button
+                android:id="@+id/btnCategoryTheater"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_theater" />
+
+            <Button
+                android:id="@+id/btnCategoryConcert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_concert" />
+
+            <Button
+                android:id="@+id/btnCategoryExhibition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_exhibition" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/btnAddEvent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/add_event" />
+
+    <ListView
+        android:id="@+id/listEvents"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
 </LinearLayout>

@@ -30,4 +30,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="featured">FEATURED</string>
     <string name="free_places">Slobodnih mesta: %1$d/%2$d</string>
+    <string name="add_event">DODAJ EVENT</string>
+    <string name="category_all">Sve</string>
+    <string name="category_party">Party</string>
+    <string name="category_festival">Festival</string>
+    <string name="category_theater">Stand-Up &amp; Theater</string>
+    <string name="category_concert">Concert</string>
+    <string name="category_exhibition">Exhibition</string>
 </resources>
