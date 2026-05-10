@@ -12,7 +12,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
-
 public class EventsFragment extends Fragment {
 
     ListView listEvents;
@@ -27,7 +26,6 @@ public class EventsFragment extends Fragment {
     Button btnAddEvent;
 
     public EventsFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -50,6 +48,7 @@ public class EventsFragment extends Fragment {
         listEvents.setAdapter(adapter);
 
         adapter.setEvents(AppData.getSortedEvents());
+        setActiveCategory(btnCategoryAll);
 
         listEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -66,6 +65,7 @@ public class EventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter.setEvents(AppData.getSortedEvents());
+                setActiveCategory(btnCategoryAll);
             }
         });
 
@@ -73,6 +73,7 @@ public class EventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter.setEvents(AppData.getSortedEventsByCategory("Party"));
+                setActiveCategory(btnCategoryParty);
             }
         });
 
@@ -80,6 +81,7 @@ public class EventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter.setEvents(AppData.getSortedEventsByCategory("Festival"));
+                setActiveCategory(btnCategoryFestival);
             }
         });
 
@@ -87,6 +89,7 @@ public class EventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter.setEvents(AppData.getSortedEventsByCategory("Stand-Up & Theater"));
+                setActiveCategory(btnCategoryTheater);
             }
         });
 
@@ -94,6 +97,7 @@ public class EventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter.setEvents(AppData.getSortedEventsByCategory("Concert"));
+                setActiveCategory(btnCategoryConcert);
             }
         });
 
@@ -101,8 +105,10 @@ public class EventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter.setEvents(AppData.getSortedEventsByCategory("Exhibition"));
+                setActiveCategory(btnCategoryExhibition);
             }
         });
+
         btnAddEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,13 +119,30 @@ public class EventsFragment extends Fragment {
 
         return view;
     }
-    //on resume za reload nakon unosa novog dogadjaja
+
     @Override
     public void onResume() {
         super.onResume();
 
         if (adapter != null) {
             adapter.setEvents(AppData.getSortedEvents());
+            setActiveCategory(btnCategoryAll);
         }
     }
+
+    private void resetCategoryButtons() {
+        btnCategoryAll.setBackgroundColor(getResources().getColor(R.color.black, null));
+        btnCategoryParty.setBackgroundColor(getResources().getColor(R.color.black, null));
+        btnCategoryFestival.setBackgroundColor(getResources().getColor(R.color.black, null));
+        btnCategoryTheater.setBackgroundColor(getResources().getColor(R.color.black, null));
+        btnCategoryConcert.setBackgroundColor(getResources().getColor(R.color.black, null));
+        btnCategoryExhibition.setBackgroundColor(getResources().getColor(R.color.black, null));
+    }
+
+    private void setActiveCategory(Button activeButton) {
+        resetCategoryButtons();
+        activeButton.setBackgroundColor(getResources().getColor(R.color.category_active, null));
+    }
+
+
 }

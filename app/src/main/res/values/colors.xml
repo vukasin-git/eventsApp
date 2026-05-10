@@ -11,5 +11,8 @@
     <color name ="orange">#F57C00</color>
     <color name="star_inactive">#9E9E9E</color>
     <color name="star_active">#FFC107</color>
+    <color name="category_active">#FFC107</color>
+    <color name="category_inactive">#D3D3D3</color>
+
 
 </resources>

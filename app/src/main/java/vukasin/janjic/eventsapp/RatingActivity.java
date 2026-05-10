@@ -67,8 +67,8 @@ public class RatingActivity extends AppCompatActivity {
     }
 
     private void updateStarColors() {
-        int activeColor = getResources().getColor(R.color.star_active);
-        int inactiveColor = getResources().getColor(R.color.star_inactive);
+        int activeColor = getResources().getColor(R.color.star_active,null);
+        int inactiveColor = getResources().getColor(R.color.star_inactive,null);
 
         btnStar1.setTextColor(selectedRating >= 1 ? activeColor : inactiveColor);
         btnStar2.setTextColor(selectedRating >= 2 ? activeColor : inactiveColor);
