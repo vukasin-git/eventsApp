@@ -98,7 +98,7 @@ public class Event {
     }
 
     public void setPromoted(boolean promoted) {
-        isPromoted = promoted;
+        this.isPromoted = promoted;
     }
 
     public void setCapacity(int capacity) {

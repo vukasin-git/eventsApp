@@ -35,12 +35,14 @@ public class EventAdapter extends BaseAdapter {
         return position;
     }
 
+    //postavljanje nove liste dogadjaja  u adpter
     public void setEvents(ArrayList<Event> events) {
         mEvents.clear();
         mEvents.addAll(events);
         notifyDataSetChanged();
     }
 
+    //brisanje svih dogadjaja iz adaptera
     public void clearEvents() {
         mEvents.clear();
         notifyDataSetChanged();
