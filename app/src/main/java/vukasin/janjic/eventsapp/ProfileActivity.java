@@ -33,6 +33,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         btnPassword.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, Password.class);
+
+            if(bundle != null){
+                String username = bundle.getString("username");
+                intent.putExtra("username",username);
+            }
             startActivity(intent);
         });
 
