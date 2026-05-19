@@ -7,6 +7,7 @@
     <string name="email">Email</string>
     <string name="admin_email">admin@eventsapp.com</string>
     <string name="wrong_login">Pogresan username ili password</string>
+    <string name="register_failed">Neuspesan register</string>
     <string name="fill_all_fields">Popunite sva polja</string>
     <string name="events">Events</string>
     <string name="my_events">My Events</string>

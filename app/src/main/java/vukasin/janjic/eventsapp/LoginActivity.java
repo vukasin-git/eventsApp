@@ -18,11 +18,13 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText loginUsername, loginPassword;
     EditText registerUsername, registerPassword, registerEmail;
+    DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        dbHelper=DatabaseHelper.getInstance(this);
 
         pocetniEkran = findViewById(R.id.pocetniEkran);
         loginEkran = findViewById(R.id.loginEkran);
@@ -64,13 +66,18 @@ public class LoginActivity extends AppCompatActivity {
                 String username = loginUsername.getText().toString().trim();
                 String password = loginPassword.getText().toString().trim();
 
-                if (username.equals("admin") && password.equals("admin")) {
+                if(username.isEmpty() || password.isEmpty()){
+                    Toast.makeText(LoginActivity.this, getString(R.string.wrong_login), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                boolean userExists = dbHelper.checkUser(username,password);
+                if (userExists) {
                     Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
 
                     Bundle bundle = new Bundle();
                     bundle.putString("username", username);
-                    bundle.putString("email", getString(R.string.admin_email));
-
+                    String email = dbHelper.getEmailByUsername(username);
+                    bundle.putString("email",email);
                     intent.putExtras(bundle);
                     startActivity(intent);
                 } else {
@@ -90,15 +97,22 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                     return;
                 }
+                String hashedPassword = PasswordHasher.hashPassword(password);
+                long result = dbHelper.insertUser(username, email, hashedPassword);
 
-                Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
+                if(result !=-1) {
+                    Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
 
-                Bundle bundle = new Bundle();
-                bundle.putString("username", username);
-                bundle.putString("email", email);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("username", username);
+                    bundle.putString("email", email);
 
-                intent.putExtras(bundle);
-                startActivity(intent);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }else{
+                    Toast.makeText(LoginActivity.this, getString(R.string.register_failed), Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }

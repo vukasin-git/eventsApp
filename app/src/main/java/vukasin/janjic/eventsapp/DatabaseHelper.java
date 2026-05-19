@@ -3,6 +3,8 @@ package vukasin.janjic.eventsapp;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.Context;
+import android.content.ContentValues;
+import android.database.Cursor;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
@@ -117,5 +119,89 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS "+ TABLE_EVENTS);
         db.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
         onCreate(db);
+    }
+
+    //METODE USER
+
+    public long insertUser(String username, String email, String hashedPassword) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_USERNAME, username);
+        values.put(COLUMN_EMAIL, email);
+        values.put(COLUMN_PASSWORD, hashedPassword);
+
+        return db.insert(TABLE_USERS, null, values);
+    }
+
+    public boolean checkUser(String username, String enteredPassword) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        String[] columns = {COLUMN_PASSWORD};
+        String selection = COLUMN_USERNAME + " = ?";
+        String[] selectionArgs = {username};
+
+        Cursor cursor = db.query(
+                TABLE_USERS,
+                columns,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String storedPasswordHash = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD));
+            cursor.close();
+            return PasswordHasher.verifyPassword(enteredPassword, storedPasswordHash);
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return false;
+    }
+
+    public boolean updateUserPassword(String username, String newHashedPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_PASSWORD, newHashedPassword);
+
+        int rowsAffected = db.update(
+                TABLE_USERS,
+                values,
+                COLUMN_USERNAME + " = ?",
+                new String[]{username}
+        );
+
+        return rowsAffected > 0;
+    }
+    public String getEmailByUsername(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_USERS,
+                new String[]{COLUMN_EMAIL},
+                COLUMN_USERNAME + " = ?",
+                new String[]{username},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL));
+            cursor.close();
+            return email;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return "";
     }
 }
