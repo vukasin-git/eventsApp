@@ -13,6 +13,9 @@ public class RatingActivity extends AppCompatActivity {
     Button btnStar1, btnStar2, btnStar3, btnStar4, btnStar5, btnConfirmRating;
 
     int selectedRating = 0;
+    DatabaseHelper dbHelper;
+    String currentUsername;
+    String eventName;
     Event currentEvent;
 
     @Override
@@ -30,7 +33,10 @@ public class RatingActivity extends AppCompatActivity {
         btnStar5 = findViewById(R.id.btnStar5);
         btnConfirmRating = findViewById(R.id.btnConfirmRating);
 
-        String eventName = getIntent().getStringExtra("event_name");
+        dbHelper=DatabaseHelper.getInstance(this);
+        eventName=getIntent().getStringExtra("event_name");
+        currentUsername=getIntent().getStringExtra("username");
+
         tvRatingEventName.setText(eventName);
 
         currentEvent = AppData.findByName(eventName);
@@ -46,15 +52,39 @@ public class RatingActivity extends AppCompatActivity {
                 Toast.makeText(RatingActivity.this,
                         getString(R.string.choose_rating_first),
                         Toast.LENGTH_SHORT).show();
-            } else {
-                if (currentEvent != null) {
-                    currentEvent.addRating(selectedRating);
-                }
-
+            }
+            if(currentUsername ==null || eventName==null){
+                Toast.makeText(RatingActivity.this,
+                        getString(R.string.rating_failed),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int userId=dbHelper.getUserIdByUsername(currentUsername);
+            int eventId=dbHelper.getEventIdByName(eventName);
+            if(userId==-1 || eventId == -1){
+                Toast.makeText(RatingActivity.this,
+                        getString(R.string.rating_failed),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            boolean alreadyRated = dbHelper.hasUserRatedEvent(userId,eventId);
+            if(alreadyRated){
+                Toast.makeText(RatingActivity.this,
+                        getString(R.string.already_rated),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            long result = dbHelper.insertRating(userId,eventId,selectedRating);
+            if(result != -1){
+                dbHelper.updateEventRatingData(eventId);
                 Toast.makeText(RatingActivity.this,
                         getString(R.string.rating_saved),
                         Toast.LENGTH_SHORT).show();
                 finish();
+            }else{
+                Toast.makeText(RatingActivity.this,
+                        getString(R.string.rating_failed),
+                        Toast.LENGTH_SHORT).show();
             }
         });
 

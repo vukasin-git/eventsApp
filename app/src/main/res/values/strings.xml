@@ -75,4 +75,7 @@
     <string name="already_attending">Već ste prijavljeni na ovaj događaj.</string>
     <string name="no_free_places">Nema slobodnih mesta.</string>
     <string name="attending_failed">Prijava na događaj nije uspela.</string>
+    <string name="already_rated">Već ste ocenili ovaj događaj.</string>
+    <string name="rating_failed">Čuvanje ocene nije uspelo.</string>
+
 </resources>

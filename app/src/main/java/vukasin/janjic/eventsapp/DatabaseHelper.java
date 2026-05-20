@@ -780,6 +780,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return events;
     }
+
+
+    //RATINGS
+    public boolean hasUserRatedEvent(int userId, int eventId){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor =db.query(
+                TABLE_RATINGS,
+                new String[]{COLUMN_RATING_ID},
+                COLUMN_RATING_USER_ID + " =? AND " + COLUMN_RATING_EVENT_ID + " = ? ",
+                new String[]{String.valueOf(userId), String.valueOf(eventId)},
+                null,
+                null,
+                null
+        );
+        boolean exists=false;
+        if(cursor !=null){
+            exists=cursor.moveToFirst();
+            cursor.close();
+        }
+        return exists;
+    }
+
+    public long insertRating(int userId,int eventId, int rating){
+        SQLiteDatabase db= getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_RATING_USER_ID, userId);
+        values.put(COLUMN_RATING_EVENT_ID,eventId);
+        values.put(COLUMN_RATING_VALUE,rating);
+        return db.insert(TABLE_RATINGS,null,values);
+    }
+
+    public void updateEventRatingData(int eventId) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT AVG(" + COLUMN_RATING_VALUE + "), COUNT(" + COLUMN_RATING_VALUE + ") " +
+                        "FROM " + TABLE_RATINGS +
+                        " WHERE " + COLUMN_RATING_EVENT_ID + " = ?",
+                new String[]{String.valueOf(eventId)}
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            double avgRating = cursor.getDouble(0);
+            int ratingCount = cursor.getInt(1);
+            cursor.close();
+
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_EVENT_AVG_RATING, avgRating);
+            values.put(COLUMN_EVENT_RATING_COUNT, ratingCount);
+
+            db.update(
+                    TABLE_EVENTS,
+                    values,
+                    COLUMN_EVENT_ID + " = ?",
+                    new String[]{String.valueOf(eventId)}
+            );
+        } else {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+
+
+
 }
 
 

@@ -9,6 +9,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.content.Intent;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+
+
 import java.util.ArrayList;
 
 public class AttendingEventAdapter extends BaseAdapter {
@@ -91,6 +95,8 @@ public class AttendingEventAdapter extends BaseAdapter {
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, RatingActivity.class);
                     intent.putExtra("event_name", event.getName());
+                    String username = ((AppCompatActivity) mContext).getIntent().getStringExtra("username");
+                    intent.putExtra("username",username);
                     mContext.startActivity(intent);
                 }
             });
