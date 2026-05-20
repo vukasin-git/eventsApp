@@ -69,4 +69,5 @@
     <string name="fill_required_fields">Popunite sva obavezna polja.</string>
     <string name="invalid_capacity">Unesite ispravan kapacitet.</string>
     <string name="event_created_successfully">Događaj uspešno kreiran.</string>
+    <string name="event_create_failed">Kreiranje događaja nije uspelo.</string>
 </resources>

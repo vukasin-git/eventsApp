@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 public class CreateEventActivity extends AppCompatActivity {
 
+    DatabaseHelper dbHelper;
     EditText etEventName, etEventDescription, etEventLocation, etEventDateTime, etCapacity;
     Spinner spinnerCategory;
     CheckBox checkPromoted;
@@ -30,6 +31,8 @@ public class CreateEventActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
+
+        dbHelper= DatabaseHelper.getInstance(this);
 
         etEventName = findViewById(R.id.etEventName);
         etEventDescription = findViewById(R.id.etEventDescription);
@@ -128,10 +131,17 @@ public class CreateEventActivity extends AppCompatActivity {
                 }
 
                 AppData.allEvents.add(newEvent);
-
-                Toast.makeText(CreateEventActivity.this,
-                        getString(R.string.event_created_successfully),
-                        Toast.LENGTH_SHORT).show();
+                long result = dbHelper.insertEvent(newEvent);
+                if(result!=-1){
+                    Toast.makeText(CreateEventActivity.this,
+                            getString(R.string.event_created_successfully),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                }else{
+                    Toast.makeText(CreateEventActivity.this,
+                            getString(R.string.event_create_failed),
+                            Toast.LENGTH_SHORT).show();
+                }
 
                 finish();
             }

@@ -5,10 +5,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.content.Context;
 import android.content.ContentValues;
 import android.database.Cursor;
+import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION=1;
+    private static final int DATABASE_VERSION=2;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
@@ -110,6 +111,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(createEventsTable);
         db.execSQL(createAttendanceTable);
         db.execSQL(createRatingsTable);
+
+        insertInitialEvents(db);
     }
 
     @Override
@@ -120,6 +123,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
         onCreate(db);
     }
+    //DODAVANJE EVENTS
+
 
     //METODE USER
 
@@ -204,4 +209,299 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return "";
     }
+
+    //EVENTI
+    private long insertEvent(SQLiteDatabase db, Event event){
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_EVENT_NAME, event.getName());
+        values.put(COLUMN_EVENT_DESCRIPTION, event.getDescription());
+        values.put(COLUMN_EVENT_LOCATION, event.getLocation());
+        values.put(COLUMN_EVENT_DATETIME, event.getDateTime());
+        values.put(COLUMN_EVENT_CATEGORY, event.getCategory());
+        values.put(COLUMN_EVENT_PROMOTED, event.isPromoted() ? 1 : 0);
+        values.put(COLUMN_EVENT_CAPACITY, event.getCapacity());
+        values.put(COLUMN_EVENT_ATTENDING_COUNT, event.getAttendingCount());
+        values.put(COLUMN_EVENT_AVG_RATING, event.getAverageRating());
+        values.put(COLUMN_EVENT_RATING_COUNT, event.getRatingCount());
+
+        return db.insert(TABLE_EVENTS,null,values);
+    }
+    public long insertEvent(Event event){
+        SQLiteDatabase db = getWritableDatabase();
+        return insertEvent(db,event);
+    }
+    private void insertInitialEvents(SQLiteDatabase db) {
+        Event e1 = EventFactory.createPromotedEvent(
+                "EXIT Festival",
+                "Najveci muzicki festival u regionu.",
+                "Petrovaradin, Novi Sad",
+                "15.07.2026 18:00",
+                "Festival",
+                R.drawable.ic_launcher_foreground,
+                50000
+        );
+
+        Event e2 = EventFactory.createPromotedEvent(
+                "NEON Party",
+                "Veliki promoted party.",
+                "Stark Arena, Beograd",
+                "10.05.2026 22:00",
+                "Party",
+                R.drawable.ic_launcher_foreground,
+                200
+        );
+
+        Event e3 = EventFactory.createRegularEvent(
+                "Rooftop Summer Party",
+                "Letnja zurka na krovu.",
+                "Dorcol Platz, Beograd",
+                "20.06.2026 21:00",
+                "Party",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e4 = EventFactory.createRegularEvent(
+                "Beer Fest",
+                "Festival piva i muzike.",
+                "Usce, Beograd",
+                "12.08.2026 16:00",
+                "Festival",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e5 = EventFactory.createRegularEvent(
+                "Nikola Djuricko: Monodrama",
+                "Pozorisna monodrama.",
+                "Narodno pozoriste, Beograd",
+                "03.05.2026 20:00",
+                "Stand-Up & Theater",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e6 = EventFactory.createRegularEvent(
+                "Hamlet",
+                "Pozorisna predstava.",
+                "JDP, Beograd",
+                "01.03.2026 19:30",
+                "Stand-Up & Theater",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e7 = EventFactory.createRegularEvent(
+                "Filharmonija: Beethoven",
+                "Koncert klasicne muzike.",
+                "Kolarac, Beograd",
+                "11.05.2026 19:00",
+                "Concert",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e8 = EventFactory.createRegularEvent(
+                "Konstrakta Live",
+                "Koncert uzivo.",
+                "Novi Sad",
+                "20.01.2026 20:00",
+                "Concert",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e9 = EventFactory.createRegularEvent(
+                "Foto Beograd 2026",
+                "Izlozba savremene fotografije.",
+                "Galerija Haos, Beograd",
+                "14.05.2026 11:00",
+                "Exhibition",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e10 = EventFactory.createRegularEvent(
+                "Modern Art Expo",
+                "Izlozba moderne umetnosti.",
+                "MSU, Beograd",
+                "18.06.2026 10:00",
+                "Exhibition",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e11 = EventFactory.createRegularEvent(
+                "Street Musicians Festival",
+                "Festival ulicnih muzicara.",
+                "Knez Mihajlova, Beograd",
+                "25.05.2026 12:00",
+                "Festival",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e12 = EventFactory.createRegularEvent(
+                "Beach Party Palic",
+                "Letnja zurka na Palicu.",
+                "Palic, Subotica",
+                "05.08.2026 20:00",
+                "Party",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e13 = EventFactory.createRegularEvent(
+                "Laki Stand-Up Specijal",
+                "Vece stand-up komedije.",
+                "Dom omladine, Beograd",
+                "15.02.2026 20:00",
+                "Stand-Up & Theater",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e14 = EventFactory.createRegularEvent(
+                "Jazz Night Nis",
+                "Vece jazz muzike.",
+                "Niska tvrdjava, Nis",
+                "10.08.2025 19:00",
+                "Concert",
+                R.drawable.ic_launcher_foreground
+        );
+
+        Event e15 = EventFactory.createRegularEvent(
+                "Science Fair",
+                "Naucna izlozba i prezentacije.",
+                "Sajam, Novi Sad",
+                "22.09.2026 09:00",
+                "Exhibition",
+                R.drawable.ic_launcher_foreground
+        );
+
+        insertEvent(db, e1);
+        insertEvent(db, e2);
+        insertEvent(db, e3);
+        insertEvent(db, e4);
+        insertEvent(db, e5);
+        insertEvent(db, e6);
+        insertEvent(db, e7);
+        insertEvent(db, e8);
+        insertEvent(db, e9);
+        insertEvent(db, e10);
+        insertEvent(db, e11);
+        insertEvent(db, e12);
+        insertEvent(db, e13);
+        insertEvent(db, e14);
+        insertEvent(db, e15);
+    }
+    public ArrayList<Event> readAllEvents() {
+        ArrayList<Event> events = new ArrayList<Event>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                COLUMN_EVENT_PROMOTED + " DESC"
+        );
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Event event = cursorToEvent(cursor);
+                events.add(event);
+            }
+            cursor.close();
+        }
+
+        return events;
+    }
+
+    public ArrayList<Event> readEventsByCategory(String category) {
+        ArrayList<Event> events = new ArrayList<Event>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                null,
+                COLUMN_EVENT_CATEGORY + " = ?",
+                new String[]{category},
+                null,
+                null,
+                COLUMN_EVENT_PROMOTED + " DESC"
+        );
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Event event = cursorToEvent(cursor);
+                events.add(event);
+            }
+            cursor.close();
+        }
+
+        return events;
+    }
+
+    public Event findEventByName(String name) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                null,
+                COLUMN_EVENT_NAME + " = ?",
+                new String[]{name},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            Event event = cursorToEvent(cursor);
+            cursor.close();
+            return event;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return null;
+    }
+
+    
+
+    private Event cursorToEvent(Cursor cursor) {
+        String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_NAME));
+        String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_DESCRIPTION));
+        String location = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_LOCATION));
+        String dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_DATETIME));
+        String category = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_CATEGORY));
+        int promoted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_PROMOTED));
+        int capacity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_CAPACITY));
+        int attendingCount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_ATTENDING_COUNT));
+        double avgRating = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_EVENT_AVG_RATING));
+        int ratingCount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_RATING_COUNT));
+
+        if (promoted == 1) {
+            return new Event(
+                    name,
+                    description,
+                    location,
+                    dateTime,
+                    category,
+                    R.drawable.ic_launcher_foreground,
+                    true,
+                    capacity,
+                    attendingCount,
+                    avgRating,
+                    ratingCount
+            );
+        } else {
+            return new Event(
+                    name,
+                    description,
+                    location,
+                    dateTime,
+                    category,
+                    R.drawable.ic_launcher_foreground,
+                    attendingCount,
+                    avgRating,
+                    ratingCount
+            );
+        }
+    }
 }
+
+

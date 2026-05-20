@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 public class EventDetailsActivity extends AppCompatActivity {
 
+    DatabaseHelper dbHelper;
     ImageView imgDetailsEvent;
     TextView tvDetailsName;
     TextView tvDetailsDescription;
@@ -27,6 +28,8 @@ public class EventDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_details);
 
+        dbHelper = DatabaseHelper.getInstance(this);
+
         imgDetailsEvent = findViewById(R.id.imgDetailsEvent);
         tvDetailsName = findViewById(R.id.tvDetailsName);
         tvDetailsDescription = findViewById(R.id.tvDetailsDescription);
@@ -41,7 +44,8 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         String eventName = getIntent().getStringExtra("event_name");
 
-        Event event = AppData.findByName(eventName);
+        //PROMENA
+        Event event = dbHelper.findEventByName(eventName);
 
         if (event != null) {
             imgDetailsEvent.setImageResource(event.getImageResId());

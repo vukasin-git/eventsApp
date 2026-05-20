@@ -14,6 +14,7 @@ public class EventsFragment extends Fragment {
 
     ListView listEvents;
     EventAdapter adapter;
+    DatabaseHelper dbHelper;
 
     Button btnCategoryAll;
     Button btnCategoryParty;
@@ -32,6 +33,8 @@ public class EventsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_events, container, false);
 
+        dbHelper=DatabaseHelper.getInstance(getActivity());
+
         listEvents = view.findViewById(R.id.listEvents);
 
         btnCategoryAll = view.findViewById(R.id.btnCategoryAll);
@@ -45,7 +48,7 @@ public class EventsFragment extends Fragment {
         adapter = new EventAdapter(getActivity());
         listEvents.setAdapter(adapter);
 
-        adapter.setEvents(AppData.getSortedEvents());
+        adapter.setEvents(dbHelper.readAllEvents());
         setActiveCategory(btnCategoryAll);
 
         listEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -62,7 +65,7 @@ public class EventsFragment extends Fragment {
         btnCategoryAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(AppData.getSortedEvents());
+                adapter.setEvents(dbHelper.readAllEvents());
                 setActiveCategory(btnCategoryAll);
             }
         });
@@ -70,7 +73,7 @@ public class EventsFragment extends Fragment {
         btnCategoryParty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(AppData.getSortedEventsByCategory("Party"));
+                adapter.setEvents(dbHelper.readEventsByCategory("Party"));
                 setActiveCategory(btnCategoryParty);
             }
         });
@@ -78,7 +81,7 @@ public class EventsFragment extends Fragment {
         btnCategoryFestival.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(AppData.getSortedEventsByCategory("Festival"));
+                adapter.setEvents(dbHelper.readEventsByCategory("Festival"));
                 setActiveCategory(btnCategoryFestival);
             }
         });
@@ -86,7 +89,7 @@ public class EventsFragment extends Fragment {
         btnCategoryTheater.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(AppData.getSortedEventsByCategory("Stand-Up & Theater"));
+                adapter.setEvents(dbHelper.readEventsByCategory("Stand-Up & Theater"));
                 setActiveCategory(btnCategoryTheater);
             }
         });
@@ -94,7 +97,7 @@ public class EventsFragment extends Fragment {
         btnCategoryConcert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(AppData.getSortedEventsByCategory("Concert"));
+                adapter.setEvents(dbHelper.readEventsByCategory("Concert"));
                 setActiveCategory(btnCategoryConcert);
             }
         });
@@ -102,7 +105,7 @@ public class EventsFragment extends Fragment {
         btnCategoryExhibition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(AppData.getSortedEventsByCategory("Exhibition"));
+                adapter.setEvents(dbHelper.readEventsByCategory("Exhibition"));
                 setActiveCategory(btnCategoryExhibition);
             }
         });
@@ -123,7 +126,7 @@ public class EventsFragment extends Fragment {
         super.onResume();
 
         if (adapter != null) {
-            adapter.setEvents(AppData.getSortedEvents());
+            adapter.setEvents(dbHelper.readAllEvents());
             setActiveCategory(btnCategoryAll);
         }
     }
