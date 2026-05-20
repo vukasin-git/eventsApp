@@ -674,6 +674,112 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return false;
     }
+
+    //INTERESTED EVENTS ZA ISPIS
+    public ArrayList<Event> readInterestedEventsForUser(String username) {
+        ArrayList<Event> events = new ArrayList<Event>();
+
+        int userId = getUserIdByUsername(username);
+        if (userId == -1) {
+            return events;
+        }
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor attendanceCursor = db.query(
+                TABLE_ATTENDANCE,
+                new String[]{COLUMN_ATTENDANCE_EVENT_ID},
+                COLUMN_ATTENDANCE_USER_ID + " = ? AND " + COLUMN_ATTENDANCE_STATUS + " = ?",
+                new String[]{String.valueOf(userId), "ZAINTERESOVAN"},
+                null,
+                null,
+                null
+        );
+
+        if (attendanceCursor != null) {
+            while (attendanceCursor.moveToNext()) {
+                int eventId = attendanceCursor.getInt(
+                        attendanceCursor.getColumnIndexOrThrow(COLUMN_ATTENDANCE_EVENT_ID)
+                );
+
+                Cursor eventCursor = db.query(
+                        TABLE_EVENTS,
+                        null,
+                        COLUMN_EVENT_ID + " = ?",
+                        new String[]{String.valueOf(eventId)},
+                        null,
+                        null,
+                        null
+                );
+
+                if (eventCursor != null && eventCursor.moveToFirst()) {
+                    Event event = cursorToEvent(eventCursor);
+                    events.add(event);
+                    eventCursor.close();
+                } else {
+                    if (eventCursor != null) {
+                        eventCursor.close();
+                    }
+                }
+            }
+            attendanceCursor.close();
+        }
+
+        return events;
+    }
+
+    //ATTENDING EVENTS ZA ISPIS
+    public ArrayList<Event> readAttendingEventsForUser(String username) {
+        ArrayList<Event> events = new ArrayList<Event>();
+
+        int userId = getUserIdByUsername(username);
+        if (userId == -1) {
+            return events;
+        }
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor attendanceCursor = db.query(
+                TABLE_ATTENDANCE,
+                new String[]{COLUMN_ATTENDANCE_EVENT_ID},
+                COLUMN_ATTENDANCE_USER_ID + " = ? AND " + COLUMN_ATTENDANCE_STATUS + " = ?",
+                new String[]{String.valueOf(userId), "PRISUSTVUJE"},
+                null,
+                null,
+                null
+        );
+
+        if (attendanceCursor != null) {
+            while (attendanceCursor.moveToNext()) {
+                int eventId = attendanceCursor.getInt(
+                        attendanceCursor.getColumnIndexOrThrow(COLUMN_ATTENDANCE_EVENT_ID)
+                );
+
+                Cursor eventCursor = db.query(
+                        TABLE_EVENTS,
+                        null,
+                        COLUMN_EVENT_ID + " = ?",
+                        new String[]{String.valueOf(eventId)},
+                        null,
+                        null,
+                        null
+                );
+
+                if (eventCursor != null && eventCursor.moveToFirst()) {
+                    Event event = cursorToEvent(eventCursor);
+                    events.add(event);
+                    eventCursor.close();
+                } else {
+                    if (eventCursor != null) {
+                        eventCursor.close();
+                    }
+                }
+            }
+            attendanceCursor.close();
+        }
+
+        return events;
+    }
 }
 
 

@@ -16,6 +16,9 @@ public class AttendingEventsActivity extends AppCompatActivity {
 
     AttendingEventAdapter upcomingAdapter, pastAdapter;
 
+    DatabaseHelper dbHelper;
+    String currentUsername;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,16 +31,35 @@ public class AttendingEventsActivity extends AppCompatActivity {
         listUpcomingEvents = findViewById(R.id.listUpcomingEvents);
         listPastEvents = findViewById(R.id.listPastEvents);
 
+        dbHelper = DatabaseHelper.getInstance(this);
+        currentUsername = getIntent().getStringExtra("username");
+
         upcomingAdapter = new AttendingEventAdapter(this, false);
         pastAdapter = new AttendingEventAdapter(this, true);
 
         listUpcomingEvents.setAdapter(upcomingAdapter);
         listPastEvents.setAdapter(pastAdapter);
 
+        loadAttendingEvents();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadAttendingEvents();
+    }
+
+    private void loadAttendingEvents() {
+        ArrayList<Event> attendingEvents = new ArrayList<Event>();
+
+        if (currentUsername != null) {
+            attendingEvents = dbHelper.readAttendingEventsForUser(currentUsername);
+        }
+
         ArrayList<Event> upcomingEvents = new ArrayList<Event>();
         ArrayList<Event> pastEvents = new ArrayList<Event>();
 
-        for (Event event : AppData.attendingEvents) {
+        for (Event event : attendingEvents) {
             if (event.isPast()) {
                 pastEvents.add(event);
             } else {
@@ -45,7 +67,7 @@ public class AttendingEventsActivity extends AppCompatActivity {
             }
         }
 
-        if (AppData.attendingEvents.isEmpty()) {
+        if (attendingEvents.isEmpty()) {
             emptyAttendingView.setVisibility(View.VISIBLE);
 
             tvUpcomingHeader.setVisibility(View.GONE);

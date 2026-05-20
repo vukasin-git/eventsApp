@@ -31,7 +31,9 @@ public class MyEventsFragment extends Fragment {
         btnInterestedEvents.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String username = getActivity().getIntent().getStringExtra("username");
                 Intent intent = new Intent(getActivity(), InterestedEventsActivity.class);
+                intent.putExtra("username",username);
                 startActivity(intent);
             }
         });
@@ -39,7 +41,9 @@ public class MyEventsFragment extends Fragment {
         btnAttendingEvents.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String username = getActivity().getIntent().getStringExtra("username");
                 Intent intent = new Intent(getActivity(), AttendingEventsActivity.class);
+                intent.putExtra("username",username);
                 startActivity(intent);
             }
         });

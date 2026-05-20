@@ -8,11 +8,16 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class InterestedEventsActivity extends AppCompatActivity {
 
     ListView listInterestedEvents;
     TextView emptyInterestedView;
     EventAdapter adapter;
+
+    DatabaseHelper dbHelper;
+    String currentUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,11 +27,17 @@ public class InterestedEventsActivity extends AppCompatActivity {
         listInterestedEvents = findViewById(R.id.listInterestedEvents);
         emptyInterestedView = findViewById(R.id.emptyInterestedView);
 
+        dbHelper = DatabaseHelper.getInstance(this);
+        currentUsername=getIntent().getStringExtra("username");
+
         adapter = new EventAdapter(this);
         listInterestedEvents.setAdapter(adapter);
         listInterestedEvents.setEmptyView(emptyInterestedView);
+        if(currentUsername != null){
+            ArrayList<Event> interestedEvents = dbHelper.readInterestedEventsForUser(currentUsername);
+            adapter.setEvents(interestedEvents);
+        }
 
-        adapter.setEvents(AppData.interestedEvents);
 
         listInterestedEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -35,6 +46,7 @@ public class InterestedEventsActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(InterestedEventsActivity.this, EventDetailsActivity.class);
                 intent.putExtra("event_name", event.getName());
+                intent.putExtra("username",currentUsername);
                 startActivity(intent);
             }
         });
