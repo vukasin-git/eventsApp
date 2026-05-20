@@ -460,7 +460,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    
+
 
     private Event cursorToEvent(Cursor cursor) {
         String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_NAME));
@@ -501,6 +501,178 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ratingCount
             );
         }
+    }
+
+    //ATTENDANCE
+    public int getUserIdByUsername(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_USERS,
+                new String[]{COLUMN_USER_ID},
+                COLUMN_USERNAME + " = ?",
+                new String[]{username.trim()},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID));
+            cursor.close();
+            return userId;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return -1;
+    }
+    public int getEventIdByName(String eventName){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                new String[]{COLUMN_EVENT_ID},
+                COLUMN_EVENT_NAME + "=?",
+                new String[]{eventName},
+                null,
+                null,
+                null,
+                null
+
+        );
+        if(cursor != null && cursor.moveToFirst()){
+            int eventId=cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_ID));
+            cursor.close();
+            return eventId;
+        }
+        if(cursor!=null){
+            cursor.close();
+        }
+        return -1;
+    }
+    public String getAttendanceStatus(int userId, int eventId) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_ATTENDANCE,
+                new String[]{COLUMN_ATTENDANCE_STATUS},
+                COLUMN_ATTENDANCE_USER_ID + " = ? AND " + COLUMN_ATTENDANCE_EVENT_ID + " = ?",
+                new String[]{String.valueOf(userId), String.valueOf(eventId)},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String status = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ATTENDANCE_STATUS));
+            cursor.close();
+            return status;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return null;
+    }
+
+    public long insertAttendance(int userId, int eventId, String status) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_ATTENDANCE_USER_ID, userId);
+        values.put(COLUMN_ATTENDANCE_EVENT_ID, eventId);
+        values.put(COLUMN_ATTENDANCE_STATUS, status);
+
+        return db.insert(TABLE_ATTENDANCE, null, values);
+    }
+
+    public boolean updateAttendanceStatus(int userId, int eventId, String status) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_ATTENDANCE_STATUS, status);
+
+        int rowsAffected = db.update(
+                TABLE_ATTENDANCE,
+                values,
+                COLUMN_ATTENDANCE_USER_ID + " = ? AND " + COLUMN_ATTENDANCE_EVENT_ID + " = ?",
+                new String[]{String.valueOf(userId), String.valueOf(eventId)}
+        );
+
+        return rowsAffected > 0;
+    }
+
+    public boolean incrementEventAttendingCount(int eventId) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                new String[]{COLUMN_EVENT_ATTENDING_COUNT},
+                COLUMN_EVENT_ID + " = ?",
+                new String[]{String.valueOf(eventId)},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int currentCount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_ATTENDING_COUNT));
+            cursor.close();
+
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_EVENT_ATTENDING_COUNT, currentCount + 1);
+
+            int rowsAffected = db.update(
+                    TABLE_EVENTS,
+                    values,
+                    COLUMN_EVENT_ID + " = ?",
+                    new String[]{String.valueOf(eventId)}
+            );
+
+            return rowsAffected > 0;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return false;
+    }
+
+    public boolean hasFreePlaces(int eventId) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                new String[]{COLUMN_EVENT_PROMOTED, COLUMN_EVENT_CAPACITY, COLUMN_EVENT_ATTENDING_COUNT},
+                COLUMN_EVENT_ID + " = ?",
+                new String[]{String.valueOf(eventId)},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int promoted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_PROMOTED));
+            int capacity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_CAPACITY));
+            int attendingCount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_ATTENDING_COUNT));
+            cursor.close();
+
+            if (promoted == 0) {
+                return true;
+            }
+
+            return attendingCount < capacity;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return false;
     }
 }
 

@@ -11,6 +11,7 @@ import android.widget.Toast;
 public class EventDetailsActivity extends AppCompatActivity {
 
     DatabaseHelper dbHelper;
+    String currentUsername;
     ImageView imgDetailsEvent;
     TextView tvDetailsName;
     TextView tvDetailsDescription;
@@ -29,6 +30,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_details);
 
         dbHelper = DatabaseHelper.getInstance(this);
+        currentUsername = getIntent().getStringExtra("username");
 
         imgDetailsEvent = findViewById(R.id.imgDetailsEvent);
         tvDetailsName = findViewById(R.id.tvDetailsName);
@@ -76,10 +78,32 @@ public class EventDetailsActivity extends AppCompatActivity {
             }
         }
 
+
         btnInterested.setOnClickListener(v -> {
-            Toast.makeText(EventDetailsActivity.this,
-                    getString(R.string.added_to_interested),
-                    Toast.LENGTH_SHORT).show();
+            if(event != null && currentUsername !=null){
+                int userId= dbHelper.getUserIdByUsername(currentUsername);
+                int eventId= dbHelper.getEventIdByName(event.getName());
+                if(userId != -1 && eventId!=-1){
+                    String existingStatus = dbHelper.getAttendanceStatus(userId,eventId);
+                    if(existingStatus==null){
+                        long result = dbHelper.insertAttendance(userId,eventId,"ZAINTERESOVAN");
+                        if(result !=-1){
+                            Toast.makeText(EventDetailsActivity.this,
+                                    getString(R.string.added_to_interested),
+                                    Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(EventDetailsActivity.this,
+                                    getString(R.string.interested_failed),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }else{
+                        Toast.makeText(EventDetailsActivity.this,
+                                getString(R.string.already_has_attendance),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
         });
 
         btnAttending.setOnClickListener(v -> {

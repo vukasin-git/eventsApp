@@ -58,6 +58,8 @@ public class EventsFragment extends Fragment {
 
                 Intent intent = new Intent(getActivity(), EventDetailsActivity.class);
                 intent.putExtra("event_name", event.getName());
+                String username = getActivity().getIntent().getStringExtra("username");
+                intent.putExtra("username",username);
                 startActivity(intent);
             }
         });

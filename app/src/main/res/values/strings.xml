@@ -70,4 +70,6 @@
     <string name="invalid_capacity">Unesite ispravan kapacitet.</string>
     <string name="event_created_successfully">Događaj uspešno kreiran.</string>
     <string name="event_create_failed">Kreiranje događaja nije uspelo.</string>
+    <string name="interested_failed">Dodavanje u zainteresovane nije uspelo.</string>
+    <string name="already_has_attendance">Već postoji zapis za ovaj događaj.</string>
 </resources>
