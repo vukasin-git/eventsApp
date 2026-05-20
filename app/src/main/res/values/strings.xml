@@ -72,4 +72,7 @@
     <string name="event_create_failed">Kreiranje događaja nije uspelo.</string>
     <string name="interested_failed">Dodavanje u zainteresovane nije uspelo.</string>
     <string name="already_has_attendance">Već postoji zapis za ovaj događaj.</string>
+    <string name="already_attending">Već ste prijavljeni na ovaj događaj.</string>
+    <string name="no_free_places">Nema slobodnih mesta.</string>
+    <string name="attending_failed">Prijava na događaj nije uspela.</string>
 </resources>

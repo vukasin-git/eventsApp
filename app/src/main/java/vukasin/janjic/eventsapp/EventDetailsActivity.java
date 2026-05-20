@@ -107,9 +107,62 @@ public class EventDetailsActivity extends AppCompatActivity {
         });
 
         btnAttending.setOnClickListener(v -> {
-            Toast.makeText(EventDetailsActivity.this,
-                    getString(R.string.signed_up_attending),
-                    Toast.LENGTH_SHORT).show();
+            if (event != null && currentUsername != null) {
+                int userId = dbHelper.getUserIdByUsername(currentUsername);
+                int eventId = dbHelper.getEventIdByName(eventName);
+
+                if (userId != -1 && eventId != -1) {
+                    String existingStatus = dbHelper.getAttendanceStatus(userId, eventId);
+
+                    if (existingStatus == null) {
+                        if (dbHelper.hasFreePlaces(eventId)) {
+                            long result = dbHelper.insertAttendance(userId, eventId, "PRISUSTVUJE");
+
+                            if (result != -1) {
+                                dbHelper.incrementEventAttendingCount(eventId);
+
+                                Toast.makeText(EventDetailsActivity.this,
+                                        getString(R.string.signed_up_attending),
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(EventDetailsActivity.this,
+                                        getString(R.string.attending_failed),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(EventDetailsActivity.this,
+                                    getString(R.string.no_free_places),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                    } else if (existingStatus.equals("ZAINTERESOVAN")) {
+                        if (dbHelper.hasFreePlaces(eventId)) {
+                            boolean updated = dbHelper.updateAttendanceStatus(userId, eventId, "PRISUSTVUJE");
+
+                            if (updated) {
+                                dbHelper.incrementEventAttendingCount(eventId);
+
+                                Toast.makeText(EventDetailsActivity.this,
+                                        getString(R.string.signed_up_attending),
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(EventDetailsActivity.this,
+                                        getString(R.string.attending_failed),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(EventDetailsActivity.this,
+                                    getString(R.string.no_free_places),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                    } else if (existingStatus.equals("PRISUSTVUJE")) {
+                        Toast.makeText(EventDetailsActivity.this,
+                                getString(R.string.already_attending),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
         });
     }
 }
