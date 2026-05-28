@@ -15,6 +15,7 @@ public class EventsFragment extends Fragment {
     ListView listEvents;
     EventAdapter adapter;
     DatabaseHelper dbHelper;
+    boolean isAdmin = false;
 
     Button btnCategoryAll;
     Button btnCategoryParty;
@@ -34,6 +35,8 @@ public class EventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
 
         dbHelper=DatabaseHelper.getInstance(getActivity());
+        isAdmin=getActivity().getIntent().getBooleanExtra("isAdmin",false);
+
 
         listEvents = view.findViewById(R.id.listEvents);
 
@@ -45,6 +48,11 @@ public class EventsFragment extends Fragment {
         btnCategoryExhibition = view.findViewById(R.id.btnCategoryExhibition);
         btnAddEvent = view.findViewById(R.id.btnAddEvent);
 
+        if (isAdmin){
+            btnAddEvent.setVisibility(View.VISIBLE);
+        }else{
+            btnAddEvent.setVisibility(View.GONE);
+        }
         adapter = new EventAdapter(getActivity());
         listEvents.setAdapter(adapter);
 

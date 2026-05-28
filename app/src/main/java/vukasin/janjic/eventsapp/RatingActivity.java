@@ -39,7 +39,6 @@ public class RatingActivity extends AppCompatActivity {
 
         tvRatingEventName.setText(eventName);
 
-        currentEvent = AppData.findByName(eventName);
 
         btnStar1.setOnClickListener(v -> setSelectedRating(1));
         btnStar2.setOnClickListener(v -> setSelectedRating(2));

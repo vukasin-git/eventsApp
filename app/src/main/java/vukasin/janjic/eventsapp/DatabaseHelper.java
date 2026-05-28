@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION=2;
+    private static final int DATABASE_VERSION = 4;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
@@ -17,6 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_USERNAME="username";
     public static final String COLUMN_EMAIL="email";
     public static final String COLUMN_PASSWORD="lozinka";
+    public static final String COLUMN_USER_IS_ADMIN = "isAdmin";
 
     // EVENTS tabela
     public static final String TABLE_EVENTS = "Events";
@@ -70,7 +71,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_USERNAME + " TEXT UNIQUE NOT NULL, " +
                 COLUMN_EMAIL + " TEXT UNIQUE NOT NULL, " +
-                COLUMN_PASSWORD + " TEXT NOT NULL" + ");";
+                COLUMN_PASSWORD + " TEXT NOT NULL," +
+                COLUMN_USER_IS_ADMIN + " INTEGER DEFAULT 0 CHECK(" + COLUMN_USER_IS_ADMIN + " IN (0,1))" +
+                ");";
 
         String createEventsTable = "CREATE TABLE " + TABLE_EVENTS + " (" +
                 COLUMN_EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -123,18 +126,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
         onCreate(db);
     }
-    //DODAVANJE EVENTS
+
 
 
     //METODE USER
 
-    public long insertUser(String username, String email, String hashedPassword) {
+    public long insertUser(String username, String email, String hashedPassword, boolean isAdmin) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(COLUMN_USERNAME, username);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_PASSWORD, hashedPassword);
+        values.put(COLUMN_USER_IS_ADMIN, isAdmin ? 1 : 0);
 
         return db.insert(TABLE_USERS, null, values);
     }
@@ -170,7 +174,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateUserPassword(String username, String newHashedPassword) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(COLUMN_PASSWORD, newHashedPassword);
@@ -184,8 +188,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rowsAffected > 0;
     }
+    public boolean isUserAdmin(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_USERS,
+                new String[]{COLUMN_USER_IS_ADMIN},
+                COLUMN_USERNAME + " = ?",
+                new String[]{username},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int isAdmin = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_IS_ADMIN));
+            cursor.close();
+            return isAdmin == 1;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return false;
+    }
     public String getEmailByUsername(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor = db.query(
                 TABLE_USERS,
@@ -237,7 +266,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Petrovaradin, Novi Sad",
                 "15.07.2026 18:00",
                 "Festival",
-                R.drawable.ic_launcher_foreground,
+                R.drawable.exitfestivallogo,
                 50000
         );
 
@@ -481,7 +510,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     location,
                     dateTime,
                     category,
-                    R.drawable.ic_launcher_foreground,
+                    R.drawable.promo,
                     true,
                     capacity,
                     attendingCount,

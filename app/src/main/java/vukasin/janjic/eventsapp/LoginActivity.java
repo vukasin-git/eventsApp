@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -18,12 +19,14 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText loginUsername, loginPassword;
     EditText registerUsername, registerPassword, registerEmail;
+    CheckBox checkIsAdmin;
     DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         dbHelper=DatabaseHelper.getInstance(this);
 
         pocetniEkran = findViewById(R.id.pocetniEkran);
@@ -41,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         registerUsername = findViewById(R.id.registerUsername);
         registerPassword = findViewById(R.id.registerPassword);
         registerEmail = findViewById(R.id.registerEmail);
+        checkIsAdmin = findViewById(R.id.checkIsAdmin);
 
         loginDugme.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,6 +82,8 @@ public class LoginActivity extends AppCompatActivity {
                     bundle.putString("username", username);
                     String email = dbHelper.getEmailByUsername(username);
                     bundle.putString("email",email);
+                    boolean isAdmin = dbHelper.isUserAdmin(username);
+                    bundle.putBoolean("isAdmin",isAdmin);
                     intent.putExtras(bundle);
                     startActivity(intent);
                 } else {
@@ -92,13 +98,14 @@ public class LoginActivity extends AppCompatActivity {
                 String username = registerUsername.getText().toString().trim();
                 String password = registerPassword.getText().toString().trim();
                 String email = registerEmail.getText().toString().trim();
+                boolean isAdmin = checkIsAdmin.isChecked();
 
                 if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
                     Toast.makeText(LoginActivity.this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 String hashedPassword = PasswordHasher.hashPassword(password);
-                long result = dbHelper.insertUser(username, email, hashedPassword);
+                long result = dbHelper.insertUser(username, email, hashedPassword,isAdmin);
 
                 if(result !=-1) {
                     Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
@@ -106,6 +113,7 @@ public class LoginActivity extends AppCompatActivity {
                     Bundle bundle = new Bundle();
                     bundle.putString("username", username);
                     bundle.putString("email", email);
+                    bundle.putBoolean("isAdmin",isAdmin);
 
                     intent.putExtras(bundle);
                     startActivity(intent);

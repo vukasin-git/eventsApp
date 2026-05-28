@@ -130,7 +130,7 @@ public class CreateEventActivity extends AppCompatActivity {
                     );
                 }
 
-                AppData.allEvents.add(newEvent);
+
                 long result = dbHelper.insertEvent(newEvent);
                 if(result!=-1){
                     Toast.makeText(CreateEventActivity.this,
