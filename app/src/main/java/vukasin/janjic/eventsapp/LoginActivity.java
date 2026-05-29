@@ -10,6 +10,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import org.json.JSONObject;
+import android.util.Log;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -104,22 +106,88 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                String hashedPassword = PasswordHasher.hashPassword(password);
-                long result = dbHelper.insertUser(username, email, hashedPassword,isAdmin);
 
-                if(result !=-1) {
-                    Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
+                new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        try{
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("username", username);
+                            jsonObject.put("password",password);
+                            jsonObject.put("email",email);
+                            jsonObject.put("isAdmin",isAdmin);
 
-                    Bundle bundle = new Bundle();
-                    bundle.putString("username", username);
-                    bundle.putString("email", email);
-                    bundle.putBoolean("isAdmin",isAdmin);
+                            JSONObject response = HttpHelper.postJSONObjectToUrl(
+                                    HttpHelper.BASE_URL + "/users",
+                                    jsonObject
+                            );
 
-                    intent.putExtras(bundle);
-                    startActivity(intent);
-                }else{
-                    Toast.makeText(LoginActivity.this, getString(R.string.register_failed), Toast.LENGTH_SHORT).show();
-                }
+
+                            if(response != null){
+
+                                String serverId = response.getString("_id");
+                                String returnedUsername = response.getString("username");
+                                String returnedEmail = response.getString("email");
+                                boolean returnedIsAdmin = response.getBoolean("isAdmin");
+
+
+
+                                String hashedPassword = PasswordHasher.hashPassword(password);
+
+                                long result = dbHelper.insertUser(
+                                        serverId,
+                                        returnedUsername,
+                                        returnedEmail,
+                                        hashedPassword,
+                                        returnedIsAdmin
+                                );
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if(result != -1){
+                                            Toast.makeText(LoginActivity.this,
+                                                    getString(R.string.register_success),
+                                                    Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(LoginActivity.this,EventsActivity.class);
+                                            Bundle bundle = new Bundle();
+                                            bundle.putString("username",returnedUsername);
+                                            bundle.putString("email",returnedEmail);
+                                            bundle.putBoolean("isAdmin",returnedIsAdmin);
+
+                                            intent.putExtras(bundle);
+                                            startActivity(intent);
+                                        }else{
+                                            Toast.makeText(LoginActivity.this,
+                                                    getString(R.string.register_failed),
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                            }else{
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(LoginActivity.this,
+                                                getString(R.string.register_failed) ,
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                        }catch(Exception e){
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(LoginActivity.this,
+                                            getString(R.string.register_failed) ,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+
+                    }
+                }).start();
 
             }
         });

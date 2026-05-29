@@ -9,11 +9,12 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
     public static final String COLUMN_USER_ID = "id";
+    private static final String COLUMN_USER_SERVER_ID = "serverID";
     public static final String COLUMN_USERNAME="username";
     public static final String COLUMN_EMAIL="email";
     public static final String COLUMN_PASSWORD="lozinka";
@@ -69,6 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String createUsersTable = "CREATE TABLE " +TABLE_USERS +"("+
                 COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_USER_SERVER_ID + " TEXT, " +
                 COLUMN_USERNAME + " TEXT UNIQUE NOT NULL, " +
                 COLUMN_EMAIL + " TEXT UNIQUE NOT NULL, " +
                 COLUMN_PASSWORD + " TEXT NOT NULL," +
@@ -131,10 +133,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //METODE USER
 
-    public long insertUser(String username, String email, String hashedPassword, boolean isAdmin) {
+    public long insertUser(String serverId, String username, String email, String hashedPassword, boolean isAdmin) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        values.put(COLUMN_USER_SERVER_ID, serverId);
         values.put(COLUMN_USERNAME, username);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_PASSWORD, hashedPassword);

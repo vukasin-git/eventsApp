@@ -78,5 +78,6 @@
     <string name="already_rated">Već ste ocenili ovaj događaj.</string>
     <string name="rating_failed">Čuvanje ocene nije uspelo.</string>
     <string name="is_admin">Admin korisnik</string>
+    <string name="register_success">Uspešna registracija.</string>
 
 </resources>

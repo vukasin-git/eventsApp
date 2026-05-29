@@ -90,7 +90,7 @@ public class HttpHelper {
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
             urlConnection.setRequestProperty("Content-Type","application/json; charset=UTF-8");
-            urlConnection.setRequestProperty("Accept","application'json");
+            urlConnection.setRequestProperty("Accept","application/json");
             urlConnection.setReadTimeout(10000);
             urlConnection.setConnectTimeout(15000);
             urlConnection.setDoOutput(true);
