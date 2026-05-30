@@ -76,21 +76,66 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, getString(R.string.wrong_login), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                boolean userExists = dbHelper.checkUser(username,password);
-                if (userExists) {
-                    Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            JSONObject jsonObject=new JSONObject();
+                            jsonObject.put("username",username);
+                            jsonObject.put("password",password);
+                            JSONObject response = HttpHelper.postJSONObjectToUrl(
+                                    HttpHelper.BASE_URL+ "/login",
+                                    jsonObject
+                            );
+                            if(response!=null){
+                                String serverId = response.getString("_id");
+                                String returnedUsername = response.getString("username");
+                                String returnedEmail = response.getString("email");
+                                boolean returnedIsAdmin = response.getBoolean("isAdmin");
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(LoginActivity.this,
+                                                getString(R.string.login_succes),
+                                                Toast.LENGTH_LONG).show();
+                                        String hashPassword=PasswordHasher.hashPassword(password);
+                                        dbHelper.insertUser(serverId,returnedUsername,returnedEmail,hashPassword,returnedIsAdmin);
+                                        Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("username", returnedUsername);
+                                        bundle.putString("email", returnedEmail);
+                                        bundle.putString("serverId", serverId);
+                                        bundle.putBoolean("isAdmin", returnedIsAdmin);
 
-                    Bundle bundle = new Bundle();
-                    bundle.putString("username", username);
-                    String email = dbHelper.getEmailByUsername(username);
-                    bundle.putString("email",email);
-                    boolean isAdmin = dbHelper.isUserAdmin(username);
-                    bundle.putBoolean("isAdmin",isAdmin);
-                    intent.putExtras(bundle);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(LoginActivity.this, getString(R.string.wrong_login), Toast.LENGTH_SHORT).show();
-                }
+                                        intent.putExtras(bundle);
+                                        startActivity(intent);
+                                    }
+                                });
+
+                            }else{
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(LoginActivity.this,
+                                                getString(R.string.wrong_login),
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                        }catch(Exception e){
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(LoginActivity.this,
+                                            getString(R.string.wrong_login),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                        }
+                    }
+                }).start();
             }
         });
 
@@ -106,6 +151,7 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                     return;
                 }
+
 
                 new Thread(new Runnable(){
                     @Override
