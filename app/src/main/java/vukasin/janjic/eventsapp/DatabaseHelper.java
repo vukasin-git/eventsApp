@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 10;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
@@ -265,6 +265,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         return insertEvent(db,serverId,event);
     }
+    public long insertOrUpdateEventFromServer(String serverId, Event event) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_EVENT_SERVER_ID, serverId);
+        values.put(COLUMN_EVENT_NAME, event.getName());
+        values.put(COLUMN_EVENT_DESCRIPTION, event.getDescription());
+        values.put(COLUMN_EVENT_LOCATION, event.getLocation());
+        values.put(COLUMN_EVENT_DATETIME, event.getDateTime());
+        values.put(COLUMN_EVENT_CATEGORY, event.getCategory());
+        values.put(COLUMN_EVENT_PROMOTED, event.isPromoted() ? 1 : 0);
+        values.put(COLUMN_EVENT_CAPACITY, event.getCapacity());
+        values.put(COLUMN_EVENT_ATTENDING_COUNT, event.getAttendingCount());
+        values.put(COLUMN_EVENT_AVG_RATING, event.getAverageRating());
+        values.put(COLUMN_EVENT_RATING_COUNT, event.getRatingCount());
+
+        int localId = getLocalEventIdByServerId(serverId);
+
+        if (localId == -1) {
+            return db.insert(TABLE_EVENTS, null, values);
+        } else {
+            int rowsAffected = db.update(
+                    TABLE_EVENTS,
+                    values,
+                    COLUMN_EVENT_ID + " = ?",
+                    new String[]{String.valueOf(localId)}
+            );
+            return rowsAffected > 0 ? localId : -1;
+        }
+    }
+    public void deleteAllEvents(){
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_EVENTS,null,null);
+    }
     private void insertInitialEvents(SQLiteDatabase db) {
         Event e1 = EventFactory.createPromotedEvent(
                 "EXIT Festival",
@@ -418,6 +452,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertEvent(db,null, e13);
         insertEvent(db,null, e14);
         insertEvent(db,null, e15);
+    }
+    public int getLocalEventIdByServerId(String serverId) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                new String[]{COLUMN_EVENT_ID},
+                COLUMN_EVENT_SERVER_ID + " = ?",
+                new String[]{serverId},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int localId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_ID));
+            cursor.close();
+            return localId;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return -1;
     }
     public ArrayList<Event> readAllEvents() {
         ArrayList<Event> events = new ArrayList<Event>();

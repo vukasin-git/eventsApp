@@ -9,6 +9,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.Locale;
+import android.net.Uri;
 
 public class EventsFragment extends Fragment {
 
@@ -26,6 +31,142 @@ public class EventsFragment extends Fragment {
     Button btnAddEvent;
 
     public EventsFragment() {
+    }
+    private void fetchAllEventsFromServer(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    JSONArray response = HttpHelper.getJSONArrayFromUrl(
+                            HttpHelper.BASE_URL + "/events"
+                    );
+                    if(response !=null){
+                        dbHelper.deleteAllEvents();
+                        for (int i=0;i<response.length();i++){
+                            JSONObject eventObject = response.getJSONObject(i);
+
+                            String serverId = eventObject.getString("_id");
+                            String name = eventObject.getString("name");
+                            String description = eventObject.getString("description");
+                            String location = eventObject.getString("location");
+                            String eventTime = eventObject.getString("eventTime");
+                            String category = eventObject.getString("category");
+                            boolean promoted = eventObject.getBoolean("promoted");
+                            int capacity = eventObject.optInt("capacity", 0);
+                            Event event;
+
+                            if(promoted){
+                                event = EventFactory.createPromotedEvent(
+                                        name,
+                                        description,
+                                        location,
+                                        eventTime,
+                                        category,
+                                        R.drawable.promo,
+                                        capacity
+                                );
+                            }else{
+                                event = EventFactory.createRegularEvent(
+                                        name,
+                                        description,
+                                        location,
+                                        eventTime,
+                                        category,
+                                        R.drawable.ic_launcher_foreground
+                                );
+                            }
+                            dbHelper.insertOrUpdateEventFromServer(serverId,event);
+                        }
+                        if(getActivity()!= null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.setEvents(dbHelper.readAllEvents());
+                                    setActiveCategory(btnCategoryAll);
+                                }
+                            });
+                        }
+                    }
+                }catch(Exception e){
+                    if(getActivity()!=null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.setEvents(dbHelper.readAllEvents());
+                            }
+                        });
+                    }
+                }
+            }
+        }).start();
+    }
+    private void fetchEventsByCategoryFromServer(String category){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    String encodedCategory = Uri.encode(category);
+                    JSONArray response = HttpHelper.getJSONArrayFromUrl(
+                            HttpHelper.BASE_URL + "/events/" + encodedCategory
+                    );
+                    ArrayList<Event> categoryEvents = new ArrayList<Event>();
+
+                    if(response != null){
+                        for (int i = 0; i< response.length();i++) {
+                            JSONObject eventObject = response.getJSONObject(i);
+                            String serverId = eventObject.getString("_id");
+                            String name = eventObject.getString("name");
+                            String description = eventObject.optString("description", "");
+                            String location = eventObject.getString("location");
+                            String eventTime = eventObject.getString("eventTime");
+                            String returnedCategory = eventObject.getString("category");
+                            boolean promoted = eventObject.getBoolean("promoted");
+                            int capacity = eventObject.optInt("capacity", 0);
+                            Event event;
+                            if (promoted) {
+                                event = EventFactory.createPromotedEvent(
+                                        name,
+                                        description,
+                                        location,
+                                        eventTime,
+                                        returnedCategory,
+                                        R.drawable.ic_launcher_foreground,
+                                        capacity
+                                );
+                            } else {
+                                event = EventFactory.createRegularEvent(
+                                        name,
+                                        description,
+                                        location,
+                                        eventTime,
+                                        returnedCategory,
+                                        R.drawable.ic_launcher_foreground
+                                );
+                            }
+                            dbHelper.insertOrUpdateEventFromServer(serverId, event);
+                            categoryEvents.add(event);
+                        }
+                    }
+                    if(getActivity()!=null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.setEvents(categoryEvents);
+                            }
+                        });
+                    }
+                }catch(Exception e){
+                    if(getActivity()!=null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.setEvents(dbHelper.readEventsByCategory(category));
+                            }
+                        });
+                    }
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -56,8 +197,7 @@ public class EventsFragment extends Fragment {
         adapter = new EventAdapter(getActivity());
         listEvents.setAdapter(adapter);
 
-        adapter.setEvents(dbHelper.readAllEvents());
-        setActiveCategory(btnCategoryAll);
+        fetchAllEventsFromServer();
 
         listEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -75,15 +215,15 @@ public class EventsFragment extends Fragment {
         btnCategoryAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(dbHelper.readAllEvents());
-                setActiveCategory(btnCategoryAll);
+                fetchAllEventsFromServer();
+
             }
         });
 
         btnCategoryParty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(dbHelper.readEventsByCategory("Party"));
+                fetchEventsByCategoryFromServer("Party");
                 setActiveCategory(btnCategoryParty);
             }
         });
@@ -91,7 +231,7 @@ public class EventsFragment extends Fragment {
         btnCategoryFestival.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(dbHelper.readEventsByCategory("Festival"));
+                fetchEventsByCategoryFromServer("Festival");
                 setActiveCategory(btnCategoryFestival);
             }
         });
@@ -99,7 +239,7 @@ public class EventsFragment extends Fragment {
         btnCategoryTheater.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(dbHelper.readEventsByCategory("Stand-Up & Theater"));
+                fetchEventsByCategoryFromServer("Stand-Up & Theater");
                 setActiveCategory(btnCategoryTheater);
             }
         });
@@ -107,7 +247,7 @@ public class EventsFragment extends Fragment {
         btnCategoryConcert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(dbHelper.readEventsByCategory("Concert"));
+                fetchEventsByCategoryFromServer("Concert");
                 setActiveCategory(btnCategoryConcert);
             }
         });
@@ -115,7 +255,7 @@ public class EventsFragment extends Fragment {
         btnCategoryExhibition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.setEvents(dbHelper.readEventsByCategory("Exhibition"));
+                fetchEventsByCategoryFromServer("Exhibition");
                 setActiveCategory(btnCategoryExhibition);
             }
         });
