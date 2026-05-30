@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 8;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
@@ -23,6 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // EVENTS tabela
     public static final String TABLE_EVENTS = "Events";
     public static final String COLUMN_EVENT_ID = "id";
+    public static final String COLUMN_EVENT_SERVER_ID ="serverId";
     public static final String COLUMN_EVENT_NAME = "naziv";
     public static final String COLUMN_EVENT_DESCRIPTION = "opis";
     public static final String COLUMN_EVENT_LOCATION = "lokacija";
@@ -79,6 +80,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String createEventsTable = "CREATE TABLE " + TABLE_EVENTS + " (" +
                 COLUMN_EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_EVENT_SERVER_ID + " TEXT, " +
                 COLUMN_EVENT_NAME + " TEXT NOT NULL, " +
                 COLUMN_EVENT_DESCRIPTION + " TEXT, " +
                 COLUMN_EVENT_LOCATION + " TEXT NOT NULL, " +
@@ -243,8 +245,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //EVENTI
-    private long insertEvent(SQLiteDatabase db, Event event){
+    private long insertEvent(SQLiteDatabase db,String serverID, Event event){
         ContentValues values = new ContentValues();
+        values.put(COLUMN_EVENT_SERVER_ID, serverID);
         values.put(COLUMN_EVENT_NAME, event.getName());
         values.put(COLUMN_EVENT_DESCRIPTION, event.getDescription());
         values.put(COLUMN_EVENT_LOCATION, event.getLocation());
@@ -258,9 +261,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return db.insert(TABLE_EVENTS,null,values);
     }
-    public long insertEvent(Event event){
+    public long insertEvent(String serverId,Event event){
         SQLiteDatabase db = getWritableDatabase();
-        return insertEvent(db,event);
+        return insertEvent(db,serverId,event);
     }
     private void insertInitialEvents(SQLiteDatabase db) {
         Event e1 = EventFactory.createPromotedEvent(
@@ -400,21 +403,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 R.drawable.ic_launcher_foreground
         );
 
-        insertEvent(db, e1);
-        insertEvent(db, e2);
-        insertEvent(db, e3);
-        insertEvent(db, e4);
-        insertEvent(db, e5);
-        insertEvent(db, e6);
-        insertEvent(db, e7);
-        insertEvent(db, e8);
-        insertEvent(db, e9);
-        insertEvent(db, e10);
-        insertEvent(db, e11);
-        insertEvent(db, e12);
-        insertEvent(db, e13);
-        insertEvent(db, e14);
-        insertEvent(db, e15);
+        insertEvent(db,null, e1);
+        insertEvent(db, null, e2);
+        insertEvent(db,null, e3);
+        insertEvent(db,null, e4);
+        insertEvent(db,null, e5);
+        insertEvent(db,null, e6);
+        insertEvent(db,null, e7);
+        insertEvent(db,null, e8);
+        insertEvent(db,null, e9);
+        insertEvent(db,null, e10);
+        insertEvent(db,null, e11);
+        insertEvent(db,null, e12);
+        insertEvent(db,null, e13);
+        insertEvent(db,null, e14);
+        insertEvent(db,null, e15);
     }
     public ArrayList<Event> readAllEvents() {
         ArrayList<Event> events = new ArrayList<Event>();

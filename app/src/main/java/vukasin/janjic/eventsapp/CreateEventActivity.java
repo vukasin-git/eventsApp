@@ -10,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import org.json.JSONObject;
 
 public class CreateEventActivity extends AppCompatActivity {
 
@@ -72,6 +73,7 @@ public class CreateEventActivity extends AppCompatActivity {
                 String location = etEventLocation.getText().toString().trim();
                 String dateTime = etEventDateTime.getText().toString().trim();
                 String category = spinnerCategory.getSelectedItem().toString();
+                boolean isPromoted = checkPromoted.isChecked();
 
                 if (name.isEmpty() || location.isEmpty() || dateTime.isEmpty()) {
                     Toast.makeText(CreateEventActivity.this,
@@ -80,9 +82,8 @@ public class CreateEventActivity extends AppCompatActivity {
                     return;
                 }
 
-                Event newEvent;
-
-                if (checkPromoted.isChecked()) {
+                int capacity = 0;
+                if (isPromoted) {
                     String capacityText = etCapacity.getText().toString().trim();
 
                     if (capacityText.isEmpty()) {
@@ -91,8 +92,6 @@ public class CreateEventActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    int capacity;
 
                     try {
                         capacity = Integer.parseInt(capacityText);
@@ -109,41 +108,102 @@ public class CreateEventActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    newEvent = EventFactory.createPromotedEvent(
-                            name,
-                            description,
-                            location,
-                            dateTime,
-                            category,
-                            R.drawable.ic_launcher_foreground,
-                            capacity
-                    );
-                } else {
-                    newEvent = EventFactory.createRegularEvent(
-                            name,
-                            description,
-                            location,
-                            dateTime,
-                            category,
-                            R.drawable.ic_launcher_foreground
-                    );
                 }
 
+                final int finalCapacity = capacity;
 
-                long result = dbHelper.insertEvent(newEvent);
-                if(result!=-1){
-                    Toast.makeText(CreateEventActivity.this,
-                            getString(R.string.event_created_successfully),
-                            Toast.LENGTH_SHORT).show();
-                    finish();
-                }else{
-                    Toast.makeText(CreateEventActivity.this,
-                            getString(R.string.event_create_failed),
-                            Toast.LENGTH_SHORT).show();
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("name", name);
+                            jsonObject.put("description", description);
+                            jsonObject.put("location", location);
+                            jsonObject.put("eventTime", dateTime);
+                            jsonObject.put("category", category);
+                            jsonObject.put("promoted", isPromoted);
+                            jsonObject.put("capacity", finalCapacity);
 
-                finish();
+
+                            JSONObject response = HttpHelper.postJSONObjectToUrl(
+                                    HttpHelper.BASE_URL + "/events",
+                                    jsonObject
+                            );
+
+                            if (response != null) {
+                                String serverId = response.getString("_id");
+                                String returnedName = response.getString("name");
+                                String returnedDescription = response.getString("description");
+                                String returnedLocation = response.getString("location");
+                                String returnedDateTime = response.getString("eventTime");
+                                String returnedCategory = response.getString("category");
+                                boolean returnedPromoted = response.getBoolean("promoted");
+                                int returnedCapacity = response.optInt("capacity", 0);
+
+                                Event newEvent;
+
+                                if (returnedPromoted) {
+                                    newEvent = EventFactory.createPromotedEvent(
+                                            returnedName,
+                                            returnedDescription,
+                                            returnedLocation,
+                                            returnedDateTime,
+                                            returnedCategory,
+                                            R.drawable.ic_launcher_foreground,
+                                            returnedCapacity
+                                    );
+                                } else {
+                                    newEvent = EventFactory.createRegularEvent(
+                                            returnedName,
+                                            returnedDescription,
+                                            returnedLocation,
+                                            returnedDateTime,
+                                            returnedCategory,
+                                            R.drawable.ic_launcher_foreground
+                                    );
+                                }
+
+                                long result = dbHelper.insertEvent(serverId, newEvent);
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (result != -1) {
+                                            Toast.makeText(CreateEventActivity.this,
+                                                    getString(R.string.event_created_successfully),
+                                                    Toast.LENGTH_SHORT).show();
+                                            finish();
+                                        } else {
+                                            Toast.makeText(CreateEventActivity.this,
+                                                    getString(R.string.event_create_failed),
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                            } else {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(CreateEventActivity.this,
+                                                getString(R.string.event_create_failed),
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                        } catch (Exception e) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(CreateEventActivity.this,
+                                            getString(R.string.event_create_failed),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }
+                }).start();
             }
         });
     }
