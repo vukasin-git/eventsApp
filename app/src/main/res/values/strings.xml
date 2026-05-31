@@ -80,5 +80,6 @@
     <string name="rating_failed">Čuvanje ocene nije uspelo.</string>
     <string name="is_admin">Admin korisnik</string>
     <string name="register_success">Uspešna registracija.</string>
+    <string name="friends_activity_title">Friends Activity</string>
 
 </resources>

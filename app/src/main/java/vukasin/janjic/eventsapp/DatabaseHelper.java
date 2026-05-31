@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 17;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
@@ -119,7 +119,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(createAttendanceTable);
         db.execSQL(createRatingsTable);
 
-        insertInitialEvents(db);
+        //insertInitialEvents(db);
     }
 
     @Override
@@ -299,7 +299,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         db.delete(TABLE_EVENTS,null,null);
     }
-    private void insertInitialEvents(SQLiteDatabase db) {
+    /*private void insertInitialEvents(SQLiteDatabase db) {
         Event e1 = EventFactory.createPromotedEvent(
                 "EXIT Festival",
                 "Najveci muzicki festival u regionu.",
@@ -452,7 +452,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertEvent(db,null, e13);
         insertEvent(db,null, e14);
         insertEvent(db,null, e15);
-    }
+    }*/
     public int getLocalEventIdByServerId(String serverId) {
         SQLiteDatabase db = getReadableDatabase();
 
@@ -1004,7 +1004,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public Event findEventByServerId(String serverId) {
+        SQLiteDatabase db = getReadableDatabase();
 
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                null,
+                COLUMN_EVENT_SERVER_ID + " = ?",
+                new String[]{serverId},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            Event event = cursorToEvent(cursor);
+            cursor.close();
+            return event;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return null;
+    }
 
 
 }

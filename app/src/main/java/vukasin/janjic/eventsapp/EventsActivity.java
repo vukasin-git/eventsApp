@@ -34,6 +34,7 @@ public class EventsActivity extends AppCompatActivity {
 
         btnEvents.setOnClickListener(v -> loadFragment(new EventsFragment()));
         btnMyEvents.setOnClickListener(v -> loadFragment(new MyEventsFragment()));
+        btnFriends.setOnClickListener(v -> loadFragment(new FriendsFragment()));
     }
 
     private void loadFragment(Fragment fragment) {

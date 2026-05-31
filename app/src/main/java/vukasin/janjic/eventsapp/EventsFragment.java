@@ -41,7 +41,7 @@ public class EventsFragment extends Fragment {
                             HttpHelper.BASE_URL + "/events"
                     );
                     if(response !=null){
-                        dbHelper.deleteAllEvents();
+
                         for (int i=0;i<response.length();i++){
                             JSONObject eventObject = response.getJSONObject(i);
 

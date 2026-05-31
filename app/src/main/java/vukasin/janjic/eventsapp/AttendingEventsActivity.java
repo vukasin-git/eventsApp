@@ -81,48 +81,20 @@ public class AttendingEventsActivity extends AppCompatActivity {
                             JSONObject attendanceObject = response.getJSONObject(i);
 
                             String commitment = attendanceObject.getString("commitment");
-                            JSONObject eventObject = attendanceObject.getJSONObject("eventId");
+                            String serverEventId = attendanceObject.getString("eventId");
 
-                            String serverEventId = eventObject.getString("_id");
-                            String name = eventObject.getString("name");
-                            String description = eventObject.optString("description", "");
-                            String location = eventObject.getString("location");
-                            String eventTime = eventObject.getString("eventTime");
-                            String category = eventObject.getString("category");
-                            boolean promoted = eventObject.getBoolean("promoted");
-                            int capacity = eventObject.optInt("capacity", 0);
+                            Event event = dbHelper.findEventByServerId(serverEventId);
 
-                            Event event;
+                            if (event != null) {
+                                int localEventId = dbHelper.getLocalEventIdByServerId(serverEventId);
 
-                            if (promoted) {
-                                event = EventFactory.createPromotedEvent(
-                                        name,
-                                        description,
-                                        location,
-                                        eventTime,
-                                        category,
-                                        R.drawable.ic_launcher_foreground,
-                                        capacity
-                                );
-                            } else {
-                                event = EventFactory.createRegularEvent(
-                                        name,
-                                        description,
-                                        location,
-                                        eventTime,
-                                        category,
-                                        R.drawable.ic_launcher_foreground
-                                );
-                            }
+                                if (localEventId != -1) {
+                                    dbHelper.insertOrUpdateAttendance(localUserId, localEventId, commitment);
+                                }
 
-                            int localEventId = dbHelper.getLocalEventIdByServerId(serverEventId);
-
-                            if (localEventId != -1) {
-                                dbHelper.insertOrUpdateAttendance(localUserId, localEventId, commitment);
-                            }
-
-                            if (commitment.equals("PRISUSTVUJE")) {
-                                attendingEvents.add(event);
+                                if (commitment.equals("PRISUSTVUJE")) {
+                                    attendingEvents.add(event);
+                                }
                             }
                         }
                     }
