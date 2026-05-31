@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class AttendingEventsActivity extends AppCompatActivity {
@@ -40,22 +43,115 @@ public class AttendingEventsActivity extends AppCompatActivity {
         listUpcomingEvents.setAdapter(upcomingAdapter);
         listPastEvents.setAdapter(pastAdapter);
 
-        loadAttendingEvents();
+        fetchAttendingEventsFromServer();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadAttendingEvents();
+        fetchAttendingEventsFromServer();
     }
 
-    private void loadAttendingEvents() {
-        ArrayList<Event> attendingEvents = new ArrayList<Event>();
+    private void fetchAttendingEventsFromServer() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String userServerId = dbHelper.getUserServerIdByUsername(currentUsername);
+                    int localUserId = dbHelper.getUserIdByUsername(currentUsername);
 
-        if (currentUsername != null) {
-            attendingEvents = dbHelper.readAttendingEventsForUser(currentUsername);
-        }
+                    if (userServerId == null || localUserId == -1) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                loadAttendingEventsFromLocal();
+                            }
+                        });
+                        return;
+                    }
 
+                    JSONArray response = HttpHelper.getJSONArrayFromUrl(
+                            HttpHelper.BASE_URL + "/attendance/" + userServerId
+                    );
+
+                    ArrayList<Event> attendingEvents = new ArrayList<Event>();
+
+                    if (response != null) {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject attendanceObject = response.getJSONObject(i);
+
+                            String commitment = attendanceObject.getString("commitment");
+                            JSONObject eventObject = attendanceObject.getJSONObject("eventId");
+
+                            String serverEventId = eventObject.getString("_id");
+                            String name = eventObject.getString("name");
+                            String description = eventObject.optString("description", "");
+                            String location = eventObject.getString("location");
+                            String eventTime = eventObject.getString("eventTime");
+                            String category = eventObject.getString("category");
+                            boolean promoted = eventObject.getBoolean("promoted");
+                            int capacity = eventObject.optInt("capacity", 0);
+
+                            Event event;
+
+                            if (promoted) {
+                                event = EventFactory.createPromotedEvent(
+                                        name,
+                                        description,
+                                        location,
+                                        eventTime,
+                                        category,
+                                        R.drawable.ic_launcher_foreground,
+                                        capacity
+                                );
+                            } else {
+                                event = EventFactory.createRegularEvent(
+                                        name,
+                                        description,
+                                        location,
+                                        eventTime,
+                                        category,
+                                        R.drawable.ic_launcher_foreground
+                                );
+                            }
+
+                            int localEventId = dbHelper.getLocalEventIdByServerId(serverEventId);
+
+                            if (localEventId != -1) {
+                                dbHelper.insertOrUpdateAttendance(localUserId, localEventId, commitment);
+                            }
+
+                            if (commitment.equals("PRISUSTVUJE")) {
+                                attendingEvents.add(event);
+                            }
+                        }
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadAttendingEvents(attendingEvents);
+                        }
+                    });
+
+                } catch (Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadAttendingEventsFromLocal();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void loadAttendingEventsFromLocal() {
+        ArrayList<Event> attendingEvents = dbHelper.readAttendingEventsForUser(currentUsername);
+        loadAttendingEvents(attendingEvents);
+    }
+
+    private void loadAttendingEvents(ArrayList<Event> attendingEvents) {
         ArrayList<Event> upcomingEvents = new ArrayList<Event>();
         ArrayList<Event> pastEvents = new ArrayList<Event>();
 

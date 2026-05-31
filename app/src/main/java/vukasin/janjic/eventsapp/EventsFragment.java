@@ -53,6 +53,9 @@ public class EventsFragment extends Fragment {
                             String category = eventObject.getString("category");
                             boolean promoted = eventObject.getBoolean("promoted");
                             int capacity = eventObject.optInt("capacity", 0);
+                            int attendingCount = eventObject.optInt("numberOfAttendees", 0);
+                            double averageRating = eventObject.optDouble("avgRating", 0.0);
+                            int ratingCount = eventObject.optInt("numberOfRatings", 0);
                             Event event;
 
                             if(promoted){
@@ -63,7 +66,10 @@ public class EventsFragment extends Fragment {
                                         eventTime,
                                         category,
                                         R.drawable.promo,
-                                        capacity
+                                        capacity,
+                                        attendingCount,
+                                        averageRating,
+                                        ratingCount
                                 );
                             }else{
                                 event = EventFactory.createRegularEvent(
@@ -72,7 +78,10 @@ public class EventsFragment extends Fragment {
                                         location,
                                         eventTime,
                                         category,
-                                        R.drawable.ic_launcher_foreground
+                                        R.drawable.ic_launcher_foreground,
+                                        attendingCount,
+                                        averageRating,
+                                        ratingCount
                                 );
                             }
                             dbHelper.insertOrUpdateEventFromServer(serverId,event);
@@ -122,6 +131,9 @@ public class EventsFragment extends Fragment {
                             String returnedCategory = eventObject.getString("category");
                             boolean promoted = eventObject.getBoolean("promoted");
                             int capacity = eventObject.optInt("capacity", 0);
+                            int attendingCount = eventObject.optInt("numberOfAttendees", 0);
+                            double averageRating = eventObject.optDouble("avgRating", 0.0);
+                            int ratingCount = eventObject.optInt("numberOfRatings", 0);
                             Event event;
                             if (promoted) {
                                 event = EventFactory.createPromotedEvent(
@@ -131,7 +143,10 @@ public class EventsFragment extends Fragment {
                                         eventTime,
                                         returnedCategory,
                                         R.drawable.ic_launcher_foreground,
-                                        capacity
+                                        capacity,
+                                        attendingCount,
+                                        averageRating,
+                                        ratingCount
                                 );
                             } else {
                                 event = EventFactory.createRegularEvent(
@@ -140,7 +155,10 @@ public class EventsFragment extends Fragment {
                                         location,
                                         eventTime,
                                         returnedCategory,
-                                        R.drawable.ic_launcher_foreground
+                                        R.drawable.ic_launcher_foreground,
+                                        attendingCount,
+                                        averageRating,
+                                        ratingCount
                                 );
                             }
                             dbHelper.insertOrUpdateEventFromServer(serverId, event);

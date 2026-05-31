@@ -17,6 +17,22 @@ public class EventFactory {
         );
     }
 
+    public static Event createRegularEvent(String name, String description, String location, String dateTime,
+                                           String category, int imageResId, int attendingCount,
+                                           double averageRating, int ratingCount) {
+        return new Event(
+                name,
+                description,
+                location,
+                dateTime,
+                category,
+                imageResId,
+                attendingCount,
+                averageRating,
+                ratingCount
+        );
+    }
+
     public static Event createPromotedEvent(String name, String description, String location, String dateTime,
                                             String category, int imageResId, int capacity) {
         return new Event(
@@ -31,6 +47,24 @@ public class EventFactory {
                 0,
                 0.0,
                 0
+        );
+    }
+
+    public static Event createPromotedEvent(String name, String description, String location, String dateTime,
+                                            String category, int imageResId, int capacity,
+                                            int attendingCount, double averageRating, int ratingCount) {
+        return new Event(
+                name,
+                description,
+                location,
+                dateTime,
+                category,
+                imageResId,
+                true,
+                capacity,
+                attendingCount,
+                averageRating,
+                ratingCount
         );
     }
 }

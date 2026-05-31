@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 14;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
@@ -697,6 +697,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
 
         return rowsAffected > 0;
+    }
+    public void deleteAttendanceForUser(int userId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(
+                TABLE_ATTENDANCE,
+                COLUMN_ATTENDANCE_USER_ID + " = ?",
+                new String[]{String.valueOf(userId)}
+        );
+    }
+    public void insertOrUpdateAttendance(int userId, int eventId, String commitment) {
+        String existingStatus = getAttendanceStatus(userId, eventId);
+
+        if (existingStatus == null) {
+            insertAttendance(userId, eventId, commitment);
+        } else if (!existingStatus.equals(commitment)) {
+            updateAttendanceStatus(userId, eventId, commitment);
+        }
     }
 
     public boolean incrementEventAttendingCount(int eventId) {
