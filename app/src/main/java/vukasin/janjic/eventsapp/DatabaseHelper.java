@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
     private static final String DATABASE_NAME = "EventsApp.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 13;
 
     //Users tabela
     public static final String TABLE_USERS = "Users";
@@ -767,6 +767,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return false;
+    }
+    public String getEventServerIdByName(String eventName) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_EVENTS,
+                new String[]{COLUMN_EVENT_SERVER_ID},
+                COLUMN_EVENT_NAME + " = ?",
+                new String[]{eventName},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String serverId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_SERVER_ID));
+            cursor.close();
+            return serverId;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return null;
+    }
+    public String getUserServerIdByUsername(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                TABLE_USERS,
+                new String[]{COLUMN_USER_SERVER_ID},
+                COLUMN_USERNAME + " = ?",
+                new String[]{username},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String serverId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_SERVER_ID));
+            cursor.close();
+            return serverId;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return null;
     }
 
     //INTERESTED EVENTS ZA ISPIS

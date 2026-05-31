@@ -161,6 +161,7 @@ public class EventsFragment extends Fragment {
                             @Override
                             public void run() {
                                 adapter.setEvents(dbHelper.readEventsByCategory(category));
+                                setActiveCategory(btnCategoryAll);
                             }
                         });
                     }
@@ -215,8 +216,8 @@ public class EventsFragment extends Fragment {
         btnCategoryAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setActiveCategory(btnCategoryAll);
                 fetchAllEventsFromServer();
-
             }
         });
 

@@ -7,6 +7,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.json.JSONObject;
+import android.view.View;
+
 
 public class EventDetailsActivity extends AppCompatActivity {
 
@@ -23,7 +26,19 @@ public class EventDetailsActivity extends AppCompatActivity {
 
     Button btnInterested;
     Button btnAttending;
+    Event event;
 
+    private void refreshFreePlaces() {
+        event = dbHelper.findEventByName(event.getName());
+
+        if (event != null && event.isPromoted()) {
+            int freePlaces = event.getCapacity() - event.getAttendingCount();
+            tvDetailsFreePlaces.setVisibility(View.VISIBLE);
+            tvDetailsFreePlaces.setText(
+                    getString(R.string.free_places, freePlaces, event.getCapacity())
+            );
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +60,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         btnAttending = findViewById(R.id.btnAttending);
 
         String eventName = getIntent().getStringExtra("event_name");
-
-        //PROMENA
-        Event event = dbHelper.findEventByName(eventName);
+        event = dbHelper.findEventByName(eventName);
 
         if (event != null) {
             imgDetailsEvent.setImageResource(event.getImageResId());
@@ -80,30 +93,91 @@ public class EventDetailsActivity extends AppCompatActivity {
 
 
         btnInterested.setOnClickListener(v -> {
-            if(event != null && currentUsername !=null){
-                int userId= dbHelper.getUserIdByUsername(currentUsername);
-                int eventId= dbHelper.getEventIdByName(event.getName());
-                if(userId != -1 && eventId!=-1){
-                    String existingStatus = dbHelper.getAttendanceStatus(userId,eventId);
-                    if(existingStatus==null){
-                        long result = dbHelper.insertAttendance(userId,eventId,"ZAINTERESOVAN");
-                        if(result !=-1){
-                            Toast.makeText(EventDetailsActivity.this,
-                                    getString(R.string.added_to_interested),
-                                    Toast.LENGTH_SHORT).show();
-                        }else{
-                            Toast.makeText(EventDetailsActivity.this,
-                                    getString(R.string.interested_failed),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }else{
+            if (event != null && currentUsername != null) {
+                int userId = dbHelper.getUserIdByUsername(currentUsername);
+                int eventId = dbHelper.getEventIdByName(event.getName());
+
+                if (userId != -1 && eventId != -1) {
+                    String existingStatus = dbHelper.getAttendanceStatus(userId, eventId);
+
+                    if (existingStatus == null) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    String userServerId = dbHelper.getUserServerIdByUsername(currentUsername);
+                                    String eventServerId = dbHelper.getEventServerIdByName(event.getName());
+
+                                    if (userServerId == null || eventServerId == null) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(EventDetailsActivity.this,
+                                                        getString(R.string.interested_failed),
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                        return;
+                                    }
+
+                                    JSONObject jsonObject = new JSONObject();
+                                    jsonObject.put("userId", userServerId);
+                                    jsonObject.put("eventId", eventServerId);
+                                    jsonObject.put("commitment", "ZAINTERESOVAN");
+
+                                    JSONObject response = HttpHelper.postJSONObjectToUrl(
+                                            HttpHelper.BASE_URL + "/attendance",
+                                            jsonObject
+                                    );
+
+                                    if (response != null) {
+                                        long result = dbHelper.insertAttendance(userId, eventId, "ZAINTERESOVAN");
+
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (result != -1) {
+                                                    Toast.makeText(EventDetailsActivity.this,
+                                                            getString(R.string.added_to_interested),
+                                                            Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(EventDetailsActivity.this,
+                                                            getString(R.string.interested_failed),
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(EventDetailsActivity.this,
+                                                        getString(R.string.interested_failed),
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+
+                                } catch (Exception e) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(EventDetailsActivity.this,
+                                                    getString(R.string.interested_failed),
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            }
+                        }).start();
+
+                    } else {
                         Toast.makeText(EventDetailsActivity.this,
                                 getString(R.string.already_has_attendance),
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
             }
-
         });
 
         btnAttending.setOnClickListener(v -> {
@@ -116,19 +190,80 @@ public class EventDetailsActivity extends AppCompatActivity {
 
                     if (existingStatus == null) {
                         if (dbHelper.hasFreePlaces(eventId)) {
-                            long result = dbHelper.insertAttendance(userId, eventId, "PRISUSTVUJE");
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        String userServerId = dbHelper.getUserServerIdByUsername(currentUsername);
+                                        String eventServerId = dbHelper.getEventServerIdByName(event.getName());
 
-                            if (result != -1) {
-                                dbHelper.incrementEventAttendingCount(eventId);
+                                        if (userServerId == null || eventServerId == null) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Toast.makeText(EventDetailsActivity.this,
+                                                            getString(R.string.attending_failed),
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                            return;
+                                        }
 
-                                Toast.makeText(EventDetailsActivity.this,
-                                        getString(R.string.signed_up_attending),
-                                        Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(EventDetailsActivity.this,
-                                        getString(R.string.attending_failed),
-                                        Toast.LENGTH_SHORT).show();
-                            }
+                                        JSONObject jsonObject = new JSONObject();
+                                        jsonObject.put("userId", userServerId);
+                                        jsonObject.put("eventId", eventServerId);
+                                        jsonObject.put("commitment", "PRISUSTVUJE");
+
+                                        JSONObject response = HttpHelper.postJSONObjectToUrl(
+                                                HttpHelper.BASE_URL + "/attendance",
+                                                jsonObject
+                                        );
+
+                                        if (response != null) {
+                                            long result = dbHelper.insertAttendance(userId, eventId, "PRISUSTVUJE");
+
+                                            if (result != -1) {
+                                                dbHelper.incrementEventAttendingCount(eventId);
+                                            }
+
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if (result != -1) {
+                                                        Toast.makeText(EventDetailsActivity.this,
+                                                                getString(R.string.signed_up_attending),
+                                                                Toast.LENGTH_SHORT).show();
+                                                        refreshFreePlaces();
+                                                    } else {
+                                                        Toast.makeText(EventDetailsActivity.this,
+                                                                getString(R.string.attending_failed),
+                                                                Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Toast.makeText(EventDetailsActivity.this,
+                                                            getString(R.string.attending_failed),
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                        }
+
+                                    } catch (Exception e) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(EventDetailsActivity.this,
+                                                        getString(R.string.attending_failed),
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+                                }
+                            }).start();
                         } else {
                             Toast.makeText(EventDetailsActivity.this,
                                     getString(R.string.no_free_places),
@@ -137,19 +272,80 @@ public class EventDetailsActivity extends AppCompatActivity {
 
                     } else if (existingStatus.equals("ZAINTERESOVAN")) {
                         if (dbHelper.hasFreePlaces(eventId)) {
-                            boolean updated = dbHelper.updateAttendanceStatus(userId, eventId, "PRISUSTVUJE");
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        String userServerId = dbHelper.getUserServerIdByUsername(currentUsername);
+                                        String eventServerId = dbHelper.getEventServerIdByName(event.getName());
 
-                            if (updated) {
-                                dbHelper.incrementEventAttendingCount(eventId);
+                                        if (userServerId == null || eventServerId == null) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Toast.makeText(EventDetailsActivity.this,
+                                                            getString(R.string.attending_failed),
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                            return;
+                                        }
 
-                                Toast.makeText(EventDetailsActivity.this,
-                                        getString(R.string.signed_up_attending),
-                                        Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(EventDetailsActivity.this,
-                                        getString(R.string.attending_failed),
-                                        Toast.LENGTH_SHORT).show();
-                            }
+                                        JSONObject jsonObject = new JSONObject();
+                                        jsonObject.put("userId", userServerId);
+                                        jsonObject.put("eventId", eventServerId);
+                                        jsonObject.put("commitment", "PRISUSTVUJE");
+
+                                        JSONObject response = HttpHelper.postJSONObjectToUrl(
+                                                HttpHelper.BASE_URL + "/attendance",
+                                                jsonObject
+                                        );
+
+                                        if (response != null) {
+                                            boolean updated = dbHelper.updateAttendanceStatus(userId, eventId, "PRISUSTVUJE");
+
+                                            if (updated) {
+                                                dbHelper.incrementEventAttendingCount(eventId);
+                                            }
+
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if (updated) {
+                                                        Toast.makeText(EventDetailsActivity.this,
+                                                                getString(R.string.signed_up_attending),
+                                                                Toast.LENGTH_SHORT).show();
+                                                        refreshFreePlaces();
+                                                    } else {
+                                                        Toast.makeText(EventDetailsActivity.this,
+                                                                getString(R.string.attending_failed),
+                                                                Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Toast.makeText(EventDetailsActivity.this,
+                                                            getString(R.string.attending_failed),
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                        }
+
+                                    } catch (Exception e) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(EventDetailsActivity.this,
+                                                        getString(R.string.attending_failed),
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+                                }
+                            }).start();
                         } else {
                             Toast.makeText(EventDetailsActivity.this,
                                     getString(R.string.no_free_places),

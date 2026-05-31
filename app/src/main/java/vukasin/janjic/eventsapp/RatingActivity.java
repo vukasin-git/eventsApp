@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.json.JSONObject;
 
 public class RatingActivity extends AppCompatActivity {
 
@@ -51,40 +52,118 @@ public class RatingActivity extends AppCompatActivity {
                 Toast.makeText(RatingActivity.this,
                         getString(R.string.choose_rating_first),
                         Toast.LENGTH_SHORT).show();
+                return;
             }
-            if(currentUsername ==null || eventName==null){
+
+            if (currentUsername == null || eventName == null) {
                 Toast.makeText(RatingActivity.this,
                         getString(R.string.rating_failed),
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-            int userId=dbHelper.getUserIdByUsername(currentUsername);
-            int eventId=dbHelper.getEventIdByName(eventName);
-            if(userId==-1 || eventId == -1){
-                Toast.makeText(RatingActivity.this,
-                        getString(R.string.rating_failed),
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-            boolean alreadyRated = dbHelper.hasUserRatedEvent(userId,eventId);
-            if(alreadyRated){
-                Toast.makeText(RatingActivity.this,
-                        getString(R.string.already_rated),
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-            long result = dbHelper.insertRating(userId,eventId,selectedRating);
-            if(result != -1){
-                dbHelper.updateEventRatingData(eventId);
-                Toast.makeText(RatingActivity.this,
-                        getString(R.string.rating_saved),
-                        Toast.LENGTH_SHORT).show();
-                finish();
-            }else{
-                Toast.makeText(RatingActivity.this,
-                        getString(R.string.rating_failed),
-                        Toast.LENGTH_SHORT).show();
-            }
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String userServerId = dbHelper.getUserServerIdByUsername(currentUsername);
+                        String eventServerId = dbHelper.getEventServerIdByName(eventName);
+
+                        if (userServerId == null || eventServerId == null) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(RatingActivity.this,
+                                            getString(R.string.rating_failed),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            return;
+                        }
+
+                        int localUserId = dbHelper.getUserIdByUsername(currentUsername);
+                        int localEventId = dbHelper.getEventIdByName(eventName);
+
+                        if (localUserId == -1 || localEventId == -1) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(RatingActivity.this,
+                                            getString(R.string.rating_failed),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            return;
+                        }
+
+                        boolean alreadyRated = dbHelper.hasUserRatedEvent(localUserId, localEventId);
+                        if (alreadyRated) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(RatingActivity.this,
+                                            getString(R.string.already_rated),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            return;
+                        }
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("userId", userServerId);
+                        jsonObject.put("eventId", eventServerId);
+                        jsonObject.put("rating", selectedRating);
+
+                        JSONObject response = HttpHelper.postJSONObjectToUrl(
+                                HttpHelper.BASE_URL + "/ratings",
+                                jsonObject
+                        );
+
+                        if (response != null) {
+                            long result = dbHelper.insertRating(localUserId, localEventId, selectedRating);
+
+                            if (result != -1) {
+                                dbHelper.updateEventRatingData(localEventId);
+                            }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (result != -1) {
+                                        Toast.makeText(RatingActivity.this,
+                                                getString(R.string.rating_saved),
+                                                Toast.LENGTH_SHORT).show();
+                                        finish();
+                                    } else {
+                                        Toast.makeText(RatingActivity.this,
+                                                getString(R.string.rating_failed),
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        } else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(RatingActivity.this,
+                                            getString(R.string.rating_failed),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+
+                    } catch (Exception e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(RatingActivity.this,
+                                        getString(R.string.rating_failed),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            }).start();
         });
 
         updateStarColors();
