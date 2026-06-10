@@ -128,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     Toast.makeText(LoginActivity.this,
-                                            getString(R.string.wrong_login),
+                                            getString(R.string.server_down),
                                             Toast.LENGTH_SHORT).show();
                                 }
                             });
