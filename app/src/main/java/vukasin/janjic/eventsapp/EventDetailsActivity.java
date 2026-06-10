@@ -189,7 +189,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         btnAttending.setOnClickListener(v -> {
             if (event != null && currentUsername != null) {
                 int userId = dbHelper.getUserIdByUsername(currentUsername);
-                int eventId = dbHelper.getEventIdByName(eventName);
+                int eventId = dbHelper.getEventIdByName(event.getName());
 
                 if (userId != -1 && eventId != -1) {
                     String existingStatus = dbHelper.getAttendanceStatus(userId, eventId);

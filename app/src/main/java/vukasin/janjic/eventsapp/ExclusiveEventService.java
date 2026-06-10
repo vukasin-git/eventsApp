@@ -33,7 +33,11 @@ public class ExclusiveEventService extends Service {
     private void showExclusiveEventNotification(String eventName, String eventServerId) {
         Intent intent = new Intent(this, EventDetailsActivity.class);
         intent.putExtra("event_server_id", eventServerId);
-        intent.putExtra("username", "vukasin"); // privremeno, kasnije ćemo ovo rešiti bolje
+        String currentUsername = getSharedPreferences("events_app_prefs",MODE_PRIVATE)
+                .getString("logged_in_username",null);
+        if(currentUsername!=null){
+            intent.putExtra("username",currentUsername);
+        }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this,

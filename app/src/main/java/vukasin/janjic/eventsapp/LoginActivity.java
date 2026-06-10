@@ -108,6 +108,11 @@ public class LoginActivity extends AppCompatActivity {
                                         bundle.putBoolean("isAdmin", returnedIsAdmin);
 
                                         intent.putExtras(bundle);
+                                        getSharedPreferences("events_app_prefs", MODE_PRIVATE)
+                                                .edit()
+                                                .putString("logged_in_username", returnedUsername)
+                                                .putString("logged_in_user_server_id", serverId)
+                                                .apply();
                                         startActivity(intent);
                                     }
                                 });
@@ -201,6 +206,12 @@ public class LoginActivity extends AppCompatActivity {
                                             bundle.putBoolean("isAdmin",returnedIsAdmin);
 
                                             intent.putExtras(bundle);
+                                            getSharedPreferences("events_app_prefs", MODE_PRIVATE)
+                                                    .edit()
+                                                    .putString("logged_in_username", returnedUsername)
+                                                    .putString("logged_in_user_server_id", serverId)
+                                                    .apply();
+                                            startActivity(intent);
                                             startActivity(intent);
                                         }else{
                                             Toast.makeText(LoginActivity.this,
