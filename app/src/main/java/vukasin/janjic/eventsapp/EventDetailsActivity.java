@@ -59,8 +59,14 @@ public class EventDetailsActivity extends AppCompatActivity {
         btnInterested = findViewById(R.id.btnInterested);
         btnAttending = findViewById(R.id.btnAttending);
 
+        String eventServerId = getIntent().getStringExtra("event_server_id");
         String eventName = getIntent().getStringExtra("event_name");
-        event = dbHelper.findEventByName(eventName);
+
+        if (eventServerId != null) {
+            event = dbHelper.findEventByServerId(eventServerId);
+        } else if (eventName != null) {
+            event = dbHelper.findEventByName(eventName);
+        }
 
         if (event != null) {
             imgDetailsEvent.setImageResource(event.getImageResId());

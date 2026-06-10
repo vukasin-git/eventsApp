@@ -82,5 +82,9 @@
     <string name="register_success">Uspešna registracija.</string>
     <string name="friends_activity_title">Friends Activity</string>
     <string name="server_down">Server error</string>
+    <string name="exclusive_channel_name">Exclusive Events</string>
+    <string name="exclusive_channel_description">Notifications for exclusive events</string>
+    <string name="exclusive_notification_title">New exclusive event</string>
+    <string name="exclusive_notification_text">%1$s is available. You have 5 minutes to attend.</string>
 
 </resources>
