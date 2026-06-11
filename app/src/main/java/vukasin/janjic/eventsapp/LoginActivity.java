@@ -212,7 +212,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     .putString("logged_in_user_server_id", serverId)
                                                     .apply();
                                             startActivity(intent);
-                                            startActivity(intent);
+
                                         }else{
                                             Toast.makeText(LoginActivity.this,
                                                     getString(R.string.register_failed),

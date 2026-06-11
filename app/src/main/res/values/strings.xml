@@ -86,5 +86,7 @@
     <string name="exclusive_channel_description">Notifications for exclusive events</string>
     <string name="exclusive_notification_title">New exclusive event</string>
     <string name="exclusive_notification_text">%1$s is available. You have 5 minutes to attend.</string>
+    <string name="exclusive_event_category">Exclusive</string>
+    <string name="exclusive_window_closed">Registration window is closed.</string>
 
 </resources>

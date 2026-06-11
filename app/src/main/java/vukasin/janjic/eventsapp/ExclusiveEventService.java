@@ -10,6 +10,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.os.Build;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import androidx.core.app.NotificationCompat;
 public class ExclusiveEventService extends Service {
@@ -18,7 +21,7 @@ public class ExclusiveEventService extends Service {
     private static final int EXCLUSIVE_NOTIFICATION_ID = 1001;
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     getString(R.string.exclusive_channel_name),
@@ -28,7 +31,7 @@ public class ExclusiveEventService extends Service {
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
-        }
+
     }
     private void showExclusiveEventNotification(String eventName, String eventServerId) {
         Intent intent = new Intent(this, EventDetailsActivity.class);
@@ -59,6 +62,22 @@ public class ExclusiveEventService extends Service {
 
         notificationManager.notify(EXCLUSIVE_NOTIFICATION_ID, builder.build());
     }
+
+    private void saveExclusiveEventWindow(String eventServerId) {
+        long deadlineMillis = System.currentTimeMillis() + 1 * 60 * 1000;
+
+        getSharedPreferences("events_app_prefs", MODE_PRIVATE)
+                .edit()
+                .putLong("exclusive_deadline_"+eventServerId, deadlineMillis)
+                .apply();
+    }
+
+    private String generateExclusiveEventName() {
+        String timePart = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
+                .format(new Date());
+
+        return "Exclusive Event " + timePart;
+    }
     DatabaseHelper dbHelper;
     public ExclusiveEventService() {
 
@@ -79,8 +98,9 @@ public class ExclusiveEventService extends Service {
             public void run() {
                 try {
                     JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("name", "Exclusive Event");
-                    jsonObject.put("description", "Special limited-time event.");
+                    String generatedEventName = generateExclusiveEventName();
+                    jsonObject.put("name", generatedEventName);
+                    jsonObject.put("description", "Special limited-time event.111");
                     jsonObject.put("location", "Novi Sad");
                     jsonObject.put("eventTime", "15.06.2026 20:00");
                     jsonObject.put("category", "Exclusive");
@@ -137,6 +157,8 @@ public class ExclusiveEventService extends Service {
                         long result = dbHelper.insertOrUpdateEventFromServer(serverId, event);
 
                         Log.d(LOG_TAG, "Exclusive event created. DB result = " + result);
+
+                        saveExclusiveEventWindow(serverId);
                         showExclusiveEventNotification(name, serverId);
                     } else {
                         Log.d(LOG_TAG, "Response is null");

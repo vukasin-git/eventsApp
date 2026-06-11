@@ -39,6 +39,32 @@ public class EventDetailsActivity extends AppCompatActivity {
             );
         }
     }
+    private boolean isExclusiveWindowOpen() {
+        if (event == null) {
+            return false;
+        }
+
+        if (!event.getCategory().equals(getString(R.string.exclusive_event_category))) {
+            return true;
+        }
+
+        String currentEventServerId = dbHelper.getEventServerIdByName(event.getName());
+        if (currentEventServerId == null){
+            return false;
+        }
+        long deadlineMillis = getSharedPreferences("events_app_prefs", MODE_PRIVATE)
+                .getLong("exclusive_deadline_"+currentEventServerId, 0);
+
+        if (currentEventServerId == null){
+            return false;
+        }
+
+        if (deadlineMillis == 0) {
+            return false;
+        }
+
+        return System.currentTimeMillis() <= deadlineMillis;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +101,17 @@ public class EventDetailsActivity extends AppCompatActivity {
             tvDetailsCategory.setText(getString(R.string.category_label, event.getCategory()));
             tvDetailsLocation.setText(getString(R.string.location_label, event.getLocation()));
             tvDetailsDateTime.setText(getString(R.string.datetime_label, event.getDateTime()));
+            if (!isExclusiveWindowOpen()) {
+                btnAttending.setEnabled(false);
+
+                if (event.getCategory().equals(getString(R.string.exclusive_event_category))) {
+                    Toast.makeText(EventDetailsActivity.this,
+                            getString(R.string.exclusive_window_closed),
+                            Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                btnAttending.setEnabled(true);
+            }
 
             if (event.isPromoted()) {
                 int freePlaces = event.getCapacity() - event.getAttendingCount();
@@ -100,6 +137,12 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         btnInterested.setOnClickListener(v -> {
             if (event != null && currentUsername != null) {
+                if (!isExclusiveWindowOpen()) {
+                    Toast.makeText(EventDetailsActivity.this,
+                            getString(R.string.exclusive_window_closed),
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 int userId = dbHelper.getUserIdByUsername(currentUsername);
                 int eventId = dbHelper.getEventIdByName(event.getName());
 
