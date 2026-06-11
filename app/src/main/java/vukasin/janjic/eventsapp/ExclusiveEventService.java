@@ -33,7 +33,7 @@ public class ExclusiveEventService extends Service {
             notificationManager.createNotificationChannel(channel);
 
     }
-    private void showExclusiveEventNotification(String eventName, String eventServerId) {
+    private void showExclusiveEventNotification(String eventName, String eventServerId, long remainingMillis) {
         Intent intent = new Intent(this, EventDetailsActivity.class);
         intent.putExtra("event_server_id", eventServerId);
         String currentUsername = getSharedPreferences("events_app_prefs",MODE_PRIVATE)
@@ -48,35 +48,83 @@ public class ExclusiveEventService extends Service {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-
+        String contentText = eventName+ " " +getString(R.string.exclusive_notification_text)+ " "+
+                formatRemainingTime(remainingMillis);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification)
                 .setContentTitle(getString(R.string.exclusive_notification_title))
-                .setContentText(getString(R.string.exclusive_notification_text, eventName))
+                .setContentText(contentText)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(true);
+
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         notificationManager.notify(EXCLUSIVE_NOTIFICATION_ID, builder.build());
     }
+    private void startNotificationCountdown(String eventName, String eventServerId, long deadlineMillis) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    long remainingMillis = deadlineMillis - System.currentTimeMillis();
 
-    private void saveExclusiveEventWindow(String eventServerId) {
-        long deadlineMillis = System.currentTimeMillis() + 1 * 60 * 1000;
+                    if (remainingMillis <= 0) {
+                        showExclusiveWindowClosedNotification();
+                        break;
+                    }
+
+                    showExclusiveEventNotification(eventName, eventServerId, remainingMillis);
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private long saveExclusiveEventWindow(String eventServerId) {
+        long deadlineMillis = System.currentTimeMillis() + 1 * 30 * 1000;
 
         getSharedPreferences("events_app_prefs", MODE_PRIVATE)
                 .edit()
                 .putLong("exclusive_deadline_"+eventServerId, deadlineMillis)
                 .apply();
+        return deadlineMillis;
     }
 
     private String generateExclusiveEventName() {
-        String timePart = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
+        String timePart = new SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                 .format(new Date());
 
         return "Exclusive Event " + timePart;
+    }
+    private void showExclusiveWindowClosedNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle(getString(R.string.exclusive_window_closed_title))
+                .setContentText(getString(R.string.exclusive_window_closed_text))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(EXCLUSIVE_NOTIFICATION_ID + 1, builder.build());
+    }
+
+    private String formatRemainingTime(long millis) {
+        long totalSeconds = millis / 1000;
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+
+        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
     DatabaseHelper dbHelper;
     public ExclusiveEventService() {
@@ -158,8 +206,8 @@ public class ExclusiveEventService extends Service {
 
                         Log.d(LOG_TAG, "Exclusive event created. DB result = " + result);
 
-                        saveExclusiveEventWindow(serverId);
-                        showExclusiveEventNotification(name, serverId);
+                        long deadlineMillis = saveExclusiveEventWindow(serverId);
+                        startNotificationCountdown(name, serverId,deadlineMillis);
                     } else {
                         Log.d(LOG_TAG, "Response is null");
                     }
